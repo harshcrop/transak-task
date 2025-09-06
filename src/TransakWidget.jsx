@@ -12,6 +12,7 @@ import { PersonalDetailsStep } from "./components/PersonalDetailsStep.jsx";
 import { AddressStep } from "./components/AddressStep.jsx";
 import { PurposeStep } from "./components/PurposeStep.jsx";
 import { KYCIframeStep } from "./components/KYCIframeStep.jsx";
+import { KYBFormStep } from "./components/KYBFormStep.jsx";
 import {
   useQuote,
   useCryptoCurrencies,
@@ -223,14 +224,25 @@ export function TransakWidget() {
   const handleKYCNext = (kycData) => {
     console.log("KYC verification completed:", kycData);
     actions.setIdProofData(kycData);
-    // Here you can proceed to payment processing or show success
-    alert(
-      "KYC verification completed successfully! Ready to proceed with payment."
-    );
+    // Move to KYB form after KYC completion
+    actions.setCurrentStep("kyb-form");
   };
 
   const handleKYCBack = () => {
     actions.setCurrentStep("purpose");
+  };
+
+  // Handle KYB form step
+  const handleKYBNext = (kybData) => {
+    console.log("KYB form completed:", kybData);
+    // Here you can proceed to payment processing or show success
+    alert(
+      "KYB form submitted successfully! Your application is under review. Ready to proceed with payment."
+    );
+  };
+
+  const handleKYBBack = () => {
+    actions.setCurrentStep("kyc-iframe");
   };
 
   // Get minimum amount based on selected payment method
@@ -493,6 +505,10 @@ export function TransakWidget() {
 
       {state.currentStep === "kyc-iframe" && (
         <KYCIframeStep onBack={handleKYCBack} onNext={handleKYCNext} />
+      )}
+
+      {state.currentStep === "kyb-form" && (
+        <KYBFormStep onBack={handleKYBBack} onNext={handleKYBNext} />
       )}
     </>
   );

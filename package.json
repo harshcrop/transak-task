@@ -7,11 +7,19 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "backend": "cd backend && npm run dev",
+    "start-backend": "cd backend && npm start",
+    "dev-all": "concurrently \"npm run dev\" \"npm run backend\""
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
     "lucide-react": "^0.542.0",
+    "mongoose": "^8.18.0",
+    "multer": "^2.0.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwindcss": "^4.1.13",

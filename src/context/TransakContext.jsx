@@ -76,13 +76,21 @@ const initialState = {
     completed: false,
   },
 
+  // KYB Form step
+  kybForm: {
+    submissionId: null,
+    submitted: false,
+    status: "Draft", // Draft, Submitted, Under Review, Approved, Rejected
+    completedAt: null,
+  },
+
   // Current step
   currentStep: "quote",
 
   // Progress tracking
   progress: {
     completedSteps: [],
-    totalSteps: 8,
+    totalSteps: 9, // Updated to include KYB step
   },
 
   // User details from API responses
@@ -130,6 +138,9 @@ const actionTypes = {
 
   // ID Proof actions
   SET_ID_PROOF_DATA: "SET_ID_PROOF_DATA",
+
+  // KYB Form actions
+  SET_KYB_DATA: "SET_KYB_DATA",
 
   // User details
   SET_USER_DETAILS: "SET_USER_DETAILS",
@@ -268,6 +279,15 @@ function transakReducer(state, action) {
           ...state.idProof,
           ...action.payload,
           completed: true,
+        },
+      };
+
+    case actionTypes.SET_KYB_DATA:
+      return {
+        ...state,
+        kybForm: {
+          ...state.kybForm,
+          ...action.payload,
         },
       };
 
@@ -424,6 +444,8 @@ export function TransakProvider({ children }) {
       dispatch({ type: actionTypes.SET_PURPOSE_DATA, payload: data }),
     setIdProofData: (data) =>
       dispatch({ type: actionTypes.SET_ID_PROOF_DATA, payload: data }),
+    setKybData: (data) =>
+      dispatch({ type: actionTypes.SET_KYB_DATA, payload: data }),
     setUserDetails: (data) =>
       dispatch({ type: actionTypes.SET_USER_DETAILS, payload: data }),
 
@@ -476,6 +498,7 @@ export function TransakProvider({ children }) {
         "address",
         "purpose",
         "id-proof",
+        "kyb-form",
       ];
       const currentIndex = stepOrder.indexOf(state.currentStep);
       const targetIndex = stepOrder.indexOf(step);
