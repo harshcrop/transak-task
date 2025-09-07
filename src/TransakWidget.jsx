@@ -125,6 +125,8 @@ export function TransakWidget() {
   // Handle Buy Now click
   const handleBuyNowClick = () => {
     if (!hasMinAmountError && quote) {
+      // Store the quote in context before moving to wallet step
+      actions.setQuoteResult(quote);
       actions.setCurrentStep("wallet");
     }
   };

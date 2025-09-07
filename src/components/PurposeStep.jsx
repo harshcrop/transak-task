@@ -31,6 +31,8 @@ export function PurposeStep({
   const [selectedPurpose, setSelectedPurpose] = useState(initialPurpose);
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log("PurposeStep - Current quote state:", quote);
+
   const handleContinue = async () => {
     if (!selectedPurpose) return;
 
@@ -56,12 +58,15 @@ export function PurposeStep({
           actions.setKYCPurposeSubmitted(true);
 
           // Fetch KYC requirements if we have a quote
-          if (quote?.quoteId) {
+          if (quote?.quote?.quoteId) {
             try {
-              console.log("Fetching KYC requirements...");
+              console.log(
+                "Fetching KYC requirements with quote ID:",
+                quote.quote.quoteId
+              );
               const kycResponse = await getKYCRequirements(
                 otp.authToken,
-                quote.quoteId
+                quote.quote.quoteId
               );
               console.log("KYC requirements response:", kycResponse);
 
@@ -111,6 +116,29 @@ export function PurposeStep({
               };
               actions.setKYCRequirements(mockKycData);
             }
+          } else {
+            console.warn(
+              "No quote ID available for KYC requirements. Quote:",
+              quote
+            );
+            // Use mock data for demo purposes when no quote ID is available
+            console.log("Using mock KYC requirements due to missing quote ID");
+            const mockKycData = {
+              formsRequired: [
+                {
+                  type: "IDPROOF",
+                  metadata: {
+                    options: [],
+                    documentProofOptions: [],
+                    expiresAt: "Sat, 20 Sep 2025 16:13:39 GMT",
+                    kycUrl:
+                      "https://eu.onfido.app/l/9372b88c-21f3-41a2-b496-9bec80e0de1a",
+                    workFlowRunId: "9372b88c-21f3-41a2-b496-9bec80e0de1a",
+                  },
+                },
+              ],
+            };
+            actions.setKYCRequirements(mockKycData);
           }
         } catch (apiError) {
           console.error("Error submitting purpose of usage:", apiError);

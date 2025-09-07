@@ -9,6 +9,8 @@ export function KYCIframeStep({ onBack, onNext }) {
   const [kycUrl, setKycUrl] = useState(null);
 
   useEffect(() => {
+    console.log("KYC Requirements received:", kycProcess.requirements);
+
     // Extract KYC URL from requirements
     if (kycProcess.requirements && kycProcess.requirements.formsRequired) {
       const idProofForm = kycProcess.requirements.formsRequired.find(
@@ -16,20 +18,35 @@ export function KYCIframeStep({ onBack, onNext }) {
       );
 
       if (idProofForm && idProofForm.metadata) {
-        const urlFromMeta = idProofForm.metadata.kycUrl || idProofForm.metadata.kycurl;
+        const urlFromMeta =
+          idProofForm.metadata.kycUrl || idProofForm.metadata.kycurl;
         if (urlFromMeta) {
           setKycUrl(urlFromMeta);
           console.log("KYC URL found:", urlFromMeta);
         } else {
-          console.error("No KYC URL found in IDPROOF metadata");
+          console.error(
+            "No KYC URL found in IDPROOF metadata:",
+            idProofForm.metadata
+          );
         }
       } else {
-        console.error("No KYC URL found in requirements");
+        console.error(
+          "No IDPROOF form found in requirements:",
+          kycProcess.requirements.formsRequired
+        );
       }
     } else {
-      console.error("No KYC requirements found");
+      console.error(
+        "No KYC requirements found. Current requirements:",
+        kycProcess.requirements
+      );
+
+      // If no requirements are available yet, we should wait for them to be fetched
+      if (!kycProcess.requirementsFetched) {
+        console.log("KYC requirements not yet fetched, waiting...");
+      }
     }
-  }, [kycProcess.requirements]);
+  }, [kycProcess.requirements, kycProcess.requirementsFetched]);
 
   const handleIframeLoad = () => {
     setIsLoading(false);
@@ -92,7 +109,18 @@ export function KYCIframeStep({ onBack, onNext }) {
 
         {/* Main content */}
         <div className="relative flex-1 h-[calc(90vh-12rem)]">
-          {kycUrl ? (
+          {/* Show loading if requirements are being fetched */}
+          {!kycProcess.requirementsFetched ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Fetching KYC requirements...</p>
+                <p className="text-gray-500 text-sm mt-2">
+                  Please wait while we prepare your verification
+                </p>
+              </div>
+            </div>
+          ) : kycUrl ? (
             <>
               {/* Loading overlay */}
               {isLoading && (
@@ -115,7 +143,7 @@ export function KYCIframeStep({ onBack, onNext }) {
               />
             </>
           ) : (
-            /* No KYC URL available */
+            /* No KYC URL available - show error state */
             <div className="flex items-center justify-center h-full">
               <div className="text-center p-8">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -132,17 +160,23 @@ export function KYCIframeStep({ onBack, onNext }) {
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  KYC Verification Ready
+                  KYC Requirements Unavailable
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Please complete the KYC verification process in the iframe
-                  below.
+                  We couldn't retrieve the KYC verification requirements. Please
+                  try going back and completing the previous step again.
                 </p>
+                <button
+                  onClick={onBack}
+                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mr-2"
+                >
+                  Go Back
+                </button>
                 <button
                   onClick={handleComplete}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Continue
+                  Skip for Demo
                 </button>
               </div>
             </div>
