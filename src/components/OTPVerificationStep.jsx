@@ -134,10 +134,11 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
 
               // Pass both verification response and user details to parent component
               console.log("CALLING onNext - OTP verification successful");
-              onNext(codeToVerify, {
-                ...response,
-                accessToken: accessToken,
+              onNext({
+                otpCode: codeToVerify,
+                authToken: accessToken,
                 userDetails: userDetailsResponse.data,
+                ...response,
               });
               return; // Successfully processed, exit function
             } else {
@@ -148,9 +149,10 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
               console.log(
                 "CALLING onNext - OTP verification successful (no user details)"
               );
-              onNext(codeToVerify, {
+              onNext({
+                otpCode: codeToVerify,
+                authToken: accessToken,
                 ...response,
-                accessToken: accessToken,
               });
               return; // Successfully processed, exit function
             }
@@ -160,9 +162,10 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
             console.log(
               "CALLING onNext - OTP verification successful (user details error)"
             );
-            onNext(codeToVerify, {
+            onNext({
+              otpCode: codeToVerify,
+              authToken: accessToken,
               ...response,
-              accessToken: accessToken,
             });
             return; // Successfully processed, exit function
           }

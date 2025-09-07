@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, MapPin } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
-import { updateKYCUser } from "../api/index.js";
+import { getUserDetails, updateKYCUser } from "../api/index.js";
 
 // Mock address suggestions (in real app, this would be from a geocoding API)
 const mockAddressSuggestions = [
@@ -53,13 +53,14 @@ const mockAddressSuggestions = [
   },
 ];
 
-export function AddressStep({ onBack, onNext }) {
+export function AddressStep({ userDetails, onBack, onNext }) {
   const { state, actions } = useTransakState();
   const { otp, personalDetails } = state;
   const [addressSearch, setAddressSearch] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [manualAddress, setManualAddress] = useState({
     addressLine1: "",
@@ -71,6 +72,98 @@ export function AddressStep({ onBack, onNext }) {
   });
   const [errors, setErrors] = useState({});
   const scrollContainerRef = useRef(null);
+
+  // Fetch user details from API on component mount if not available
+  useEffect(() => {
+    const fetchUserData = async () => {
+      // First check if we already have meaningful user details in context
+      const contextUserDetails = state.userDetails;
+      const hasContextUserData =
+        contextUserDetails &&
+        (contextUserDetails.addressDetails ||
+          contextUserDetails.address ||
+          contextUserDetails.addressLine1 ||
+          Object.keys(contextUserDetails).length > 2);
+
+      // Also check if props have meaningful user data
+      const hasPropsUserData =
+        userDetails &&
+        (userDetails.addressDetails ||
+          userDetails.address ||
+          userDetails.addressLine1 ||
+          Object.keys(userDetails).length > 2);
+
+      console.log("AddressStep - Data availability check:", {
+        hasContextUserData,
+        hasPropsUserData,
+        contextUserDetails: contextUserDetails ? Object.keys(contextUserDetails) : null,
+        propsUserDetails: userDetails ? Object.keys(userDetails) : null,
+        authToken: !!otp.authToken
+      });
+
+      // If we have meaningful user data in context or props, don't fetch from API
+      if (hasContextUserData || hasPropsUserData) {
+        console.log("Using existing user details for address, skipping API call");
+        return;
+      }
+
+      // Only fetch from API if we have auth token but no meaningful user data
+      if (otp.authToken) {
+        setIsLoadingUserData(true);
+        try {
+          console.log("Fetching user details from API for address...");
+          const response = await getUserDetails(otp.authToken);
+          console.log("User details API response for address:", response);
+
+          // Store user details in context
+          actions.setUserDetails(response.data);
+        } catch (error) {
+          console.error("Error fetching user details for address:", error);
+          // Continue with empty form if API call fails
+        } finally {
+          setIsLoadingUserData(false);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [otp.authToken, state.userDetails, userDetails, actions]);
+
+  // Pre-fill address form with user details if available
+  useEffect(() => {
+    // Prioritize context user details over props
+    const effectiveUserDetails = state.userDetails || userDetails;
+    
+    if (effectiveUserDetails) {
+      console.log("Pre-filling address form with user details:", {
+        source: state.userDetails ? "context" : "props",
+        data: effectiveUserDetails
+      });
+
+      // Extract address details from different possible structures
+      const addressData = effectiveUserDetails.addressDetails || 
+                         effectiveUserDetails.address || 
+                         effectiveUserDetails;
+
+      // Pre-fill manual address form if we have address data
+      if (addressData && (addressData.addressLine1 || addressData.city || addressData.state)) {
+        setManualAddress({
+          addressLine1: addressData.addressLine1 || addressData.address_line_1 || "",
+          addressLine2: addressData.addressLine2 || addressData.address_line_2 || "",
+          city: addressData.city || "",
+          state: addressData.state || addressData.region || "",
+          postalCode: addressData.postalCode || addressData.postal_code || addressData.zipCode || "",
+          country: addressData.country || addressData.countryCode || "India",
+        });
+        
+        // If we have address data, show manual entry form
+        if (addressData.addressLine1 || addressData.city) {
+          setShowManualEntry(true);
+          console.log("Pre-filled address form with existing data");
+        }
+      }
+    }
+  }, [state.userDetails, userDetails]);
 
   // Filter suggestions based on search
   useEffect(() => {
@@ -300,6 +393,37 @@ export function AddressStep({ onBack, onNext }) {
               </div>
             </div>
           </div>
+
+          {/* Loading state for user data */}
+          {isLoadingUserData && (
+            <div className="text-center py-4">
+              <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-lg">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="text-sm text-blue-600">
+                  Loading your address details...
+                </span>
+              </div>
+            </div>
+          )}
 
           {!showManualEntry ? (
             /* Address Search */

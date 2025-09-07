@@ -18,7 +18,6 @@ import {
   useCryptoCurrencies,
   useFiatCurrencies,
 } from "./api/hooks.js";
-import { getUserDetails } from "./api/index.js";
 import { useTransakState } from "./context/TransakContext.jsx";
 
 export function TransakWidget() {
@@ -165,21 +164,17 @@ export function TransakWidget() {
   // Handle OTP verification
   const handleOTPNext = async (otpData) => {
     console.log("OTP verified successfully:", otpData);
+    
+    // Store auth token
     actions.setOtpData({
-      authToken: otpData.authToken || otpData.accessToken,
+      authToken: otpData.authToken,
       verified: true,
     });
 
-    // Fetch user details if needed
-    try {
-      if (otpData.authToken || otpData.accessToken) {
-        const response = await getUserDetails(
-          otpData.authToken || otpData.accessToken
-        );
-        actions.setUserDetails(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching user details:", error);
+    // Store user details if they were fetched in OTP component
+    if (otpData.userDetails) {
+      console.log("Storing user details from OTP verification:", otpData.userDetails);
+      actions.setUserDetails(otpData.userDetails);
     }
 
     // Move to personal details step
@@ -496,7 +491,11 @@ export function TransakWidget() {
       )}
 
       {state.currentStep === "address" && (
-        <AddressStep onBack={handleAddressBack} onNext={handleAddressNext} />
+        <AddressStep 
+          userDetails={state.userDetails}
+          onBack={handleAddressBack} 
+          onNext={handleAddressNext} 
+        />
       )}
 
       {state.currentStep === "purpose" && (

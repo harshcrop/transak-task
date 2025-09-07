@@ -15,21 +15,19 @@ export function KYCIframeStep({ onBack, onNext }) {
         (form) => form.type === "IDPROOF"
       );
 
-      if (idProofForm && idProofForm.metadata && idProofForm.metadata.kycUrl) {
-        setKycUrl(idProofForm.metadata.kycUrl);
-        console.log("KYC URL found:", idProofForm.metadata.kycUrl);
+      if (idProofForm && idProofForm.metadata) {
+        const urlFromMeta = idProofForm.metadata.kycUrl || idProofForm.metadata.kycurl;
+        if (urlFromMeta) {
+          setKycUrl(urlFromMeta);
+          console.log("KYC URL found:", urlFromMeta);
+        } else {
+          console.error("No KYC URL found in IDPROOF metadata");
+        }
       } else {
         console.error("No KYC URL found in requirements");
-        // Use the demo URL provided in the requirements
-        console.log("Using demo KYC URL for testing");
-        setKycUrl(
-          "https://eu.onfido.app/l/9372b88c-21f3-41a2-b496-9bec80e0de1a"
-        );
       }
     } else {
-      // Use the demo URL provided in the requirements
-      console.log("No KYC requirements found, using demo KYC URL");
-      setKycUrl("https://eu.onfido.app/l/9372b88c-21f3-41a2-b496-9bec80e0de1a");
+      console.error("No KYC requirements found");
     }
   }, [kycProcess.requirements]);
 
@@ -137,15 +135,14 @@ export function KYCIframeStep({ onBack, onNext }) {
                   KYC Verification Ready
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Demo mode: The KYC URL will be loaded for testing purposes. In
-                  production, this would be the actual Onfido verification URL
-                  from the KYC requirements API.
+                  Please complete the KYC verification process in the iframe
+                  below.
                 </p>
                 <button
                   onClick={handleComplete}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Continue Demo
+                  Continue
                 </button>
               </div>
             </div>
@@ -158,10 +155,6 @@ export function KYCIframeStep({ onBack, onNext }) {
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">
                 <p>Complete the verification process in the frame above</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Demo KYC URL:{" "}
-                  {kycUrl.includes("demo") ? "Demo URL" : "Real Onfido URL"}
-                </p>
               </div>
               <div className="flex gap-2">
                 <button

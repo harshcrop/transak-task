@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
+import { getUserDetails, updateKYCUser } from "../api/index.js";
 
 export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
   const { state, actions } = useTransakState();
@@ -17,6 +18,7 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
 
   const months = useMemo(
     () => [
@@ -36,26 +38,148 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
     []
   );
 
+  // Fetch user details from API on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      // First check if we already have meaningful user details in context
+      const contextUserDetails = state.userDetails;
+      const hasContextUserData =
+        contextUserDetails &&
+        (contextUserDetails.firstName ||
+          contextUserDetails.personalDetails?.firstName ||
+          contextUserDetails.email ||
+          Object.keys(contextUserDetails).length > 2); // More than just basic properties
+
+      // Also check if props have meaningful user data
+      const hasPropsUserData =
+        userDetails &&
+        (userDetails.firstName ||
+          userDetails.personalDetails?.firstName ||
+          userDetails.email ||
+          Object.keys(userDetails).length > 2);
+
+      console.log("PersonalDetailsStep - Data availability check:", {
+        hasContextUserData,
+        hasPropsUserData,
+        contextUserDetails: contextUserDetails ? Object.keys(contextUserDetails) : null,
+        propsUserDetails: userDetails ? Object.keys(userDetails) : null,
+        authToken: !!otp.authToken
+      });
+
+      // If we have meaningful user data in context or props, don't fetch from API
+      if (hasContextUserData || hasPropsUserData) {
+        console.log("Using existing user details, skipping API call");
+        return;
+      }
+
+      // Only fetch from API if we have auth token but no meaningful user data
+      if (otp.authToken) {
+        setIsLoadingUserData(true);
+        try {
+          console.log("Fetching user details from API...");
+          const response = await getUserDetails(otp.authToken);
+          console.log("User details API response:", response);
+          console.log(
+            "User details data structure:",
+            JSON.stringify(response.data, null, 2)
+          );
+
+          // Store user details in context
+          actions.setUserDetails(response.data);
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+          // Continue with empty form if API call fails
+        } finally {
+          setIsLoadingUserData(false);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [otp.authToken, state.userDetails, userDetails, actions]);
+
   // Pre-fill form with user details if available
   useEffect(() => {
-    if (userDetails) {
-      console.log("Pre-filling form with user details:", userDetails);
+    // Prioritize context user details over props
+    const effectiveUserDetails = state.userDetails || userDetails;
+    
+    if (effectiveUserDetails) {
+      console.log("Pre-filling form with user details:", {
+        source: state.userDetails ? "context" : "props",
+        data: effectiveUserDetails
+      });
+
+      // Extract personal details from different possible structures
+      const personalData = effectiveUserDetails.personalDetails || effectiveUserDetails;
+
+      // Parse mobile number to extract country code and number
+      const mobileNumber =
+        personalData.mobileNumber ||
+        personalData.mobile_number ||
+        personalData.phone ||
+        "";
+      let countryCode = "+91";
+      let phoneNumber = "";
+
+      if (mobileNumber) {
+        // Check if mobile number starts with a country code
+        if (mobileNumber.startsWith("+91")) {
+          countryCode = "+91";
+          phoneNumber = mobileNumber.substring(3);
+        } else if (mobileNumber.startsWith("+1")) {
+          countryCode = "+1";
+          phoneNumber = mobileNumber.substring(2);
+        } else if (mobileNumber.startsWith("+44")) {
+          countryCode = "+44";
+          phoneNumber = mobileNumber.substring(3);
+        } else if (mobileNumber.startsWith("91") && mobileNumber.length > 10) {
+          countryCode = "+91";
+          phoneNumber = mobileNumber.substring(2);
+        } else {
+          // Assume it's just the phone number without country code
+          phoneNumber = mobileNumber;
+        }
+      }
 
       setFormData((prev) => ({
         ...prev,
-        firstName: userDetails.firstName || userDetails.first_name || "",
-        lastName: userDetails.lastName || userDetails.last_name || "",
-        mobileNumber:
-          userDetails.mobileNumber ||
-          userDetails.mobile_number ||
-          userDetails.phone ||
-          "",
+        firstName: personalData.firstName || personalData.first_name || "",
+        lastName: personalData.lastName || personalData.last_name || "",
+        mobileNumber: phoneNumber,
+        countryCode: countryCode,
         // Parse date of birth if available
-        ...(userDetails.dateOfBirth || userDetails.date_of_birth
+        ...(personalData.dateOfBirth ||
+        personalData.date_of_birth ||
+        personalData.dob
           ? (() => {
-              const dob = new Date(
-                userDetails.dateOfBirth || userDetails.date_of_birth
-              );
+              const dobString =
+                personalData.dateOfBirth ||
+                personalData.date_of_birth ||
+                personalData.dob;
+              let dob;
+
+              // Handle different date formats
+              if (typeof dobString === "string") {
+                // Handle DD-MM-YYYY format
+                if (
+                  dobString.includes("-") &&
+                  dobString.split("-").length === 3
+                ) {
+                  const parts = dobString.split("-");
+                  if (parts[2].length === 4) {
+                    // DD-MM-YYYY format
+                    dob = new Date(parts[2], parts[1] - 1, parts[0]);
+                  } else {
+                    // YYYY-MM-DD format
+                    dob = new Date(dobString);
+                  }
+                } else {
+                  dob = new Date(dobString);
+                }
+              } else {
+                dob = new Date(dobString);
+              }
+
               if (!isNaN(dob.getTime())) {
                 return {
                   day: dob.getDate().toString(),
@@ -68,7 +192,7 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
           : {}),
       }));
     }
-  }, [userDetails, months]);
+  }, [state.userDetails, userDetails, months]);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
@@ -146,9 +270,7 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
   };
 
   const handleContinue = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    const isValid = validateForm();
 
     setIsLoading(true);
     try {
@@ -157,28 +279,52 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
         months.indexOf(formData.month) + 1
       ).padStart(2, "0")}-${formData.year}`;
 
-      const personalDetails = {
+      // Prefer form data; if invalid, fall back to userDetails from API
+      let personalDetails = {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         mobileNumber: `${formData.countryCode}${formData.mobileNumber}`,
         dateOfBirth: dateOfBirth,
       };
 
-      // Check if we have an access token
+      if (!isValid && userDetails) {
+        const pd = userDetails.personalDetails || userDetails;
+        personalDetails = {
+          firstName: pd.firstName || pd.first_name || "",
+          lastName: pd.lastName || pd.last_name || "",
+          mobileNumber:
+            pd.mobileNumber || pd.mobile_number || pd.phone || "",
+          dateOfBirth:
+            pd.dateOfBirth || pd.date_of_birth || pd.dob || dateOfBirth,
+        };
+        console.log(
+          "Using fallback personalDetails from userDetails for PATCH:",
+          personalDetails
+        );
+      }
+
+      // Check if we have an access token and update KYC user data
       if (otp.authToken) {
         try {
           console.log("Updating KYC user with personal details...");
 
-          // For now, we'll store personal details and update KYC in the address step
-          // when we have both personal and address details
-          console.log("Personal details stored for later KYC update");
+          // Call PATCH /api/v2/kyc/user to update personal details
+          const response = await updateKYCUser(
+            otp.authToken,
+            personalDetails,
+            {} // Empty address details for now
+          );
+
+          console.log(
+            "KYC User personal details updated successfully:",
+            response
+          );
 
           // Mark personal details as submitted
           actions.setKYCPersonalSubmitted(true);
         } catch (apiError) {
-          console.error("Error updating KYC user:", apiError);
-          // Continue with the flow even if API call fails, for demo purposes
-          console.log("Continuing with demo flow despite API error");
+          console.error("Error submitting personal details:", apiError);
+          // Continue with the flow even if API call fails
         }
       }
 
@@ -241,6 +387,37 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
               </div>
             </div>
           </div>
+
+          {/* Loading state for user data */}
+          {isLoadingUserData && (
+            <div className="text-center py-4">
+              <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-lg">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="text-sm text-blue-600">
+                  Loading your details...
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Instructions */}
           <p className="text-gray-600 text-sm mb-6">
@@ -317,7 +494,7 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
                   handleInputChange("mobileNumber", e.target.value)
                 }
                 className="flex-1 p-3 bg-transparent border-0 focus:ring-0"
-                placeholder="85112-91978"
+                placeholder=""
               />
             </div>
             {errors.mobileNumber && (

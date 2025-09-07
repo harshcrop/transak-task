@@ -56,34 +56,7 @@ export const useFiatCurrencies = () => {
     } catch (err) {
       setError(err.message);
       console.error("Fiat currencies fetch error:", err);
-      // Provide fallback data for EUR to ensure the component works
-      setFiatCurrencies([
-        {
-          symbol: "EUR",
-          name: "Euro",
-          decimals: 2,
-          paymentMethods: ["sepa_bank_transfer", "credit_debit_card"],
-          isAllowed: true,
-          icon: null,
-          isSellAllowed: true,
-          paymentOptions: [
-            {
-              id: "sepa_bank_transfer",
-              name: "SEPA Bank Transfer",
-              processingTime: "1-3 business days",
-              minAmount: 17,
-              icon: null,
-            },
-            {
-              id: "credit_debit_card",
-              name: "Credit/Debit Card",
-              processingTime: "5-10 minutes",
-              minAmount: 50,
-              icon: null,
-            },
-          ],
-        },
-      ]);
+      setFiatCurrencies([]);
     } finally {
       setLoading(false);
     }

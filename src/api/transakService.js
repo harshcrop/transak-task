@@ -21,7 +21,6 @@ export const sendEmailOTP = async (email) => {
         stateToken: response.data.stateToken,
         email: response.data.email,
         expiresIn: response.data.expiresIn,
-        isTncAccepted: response.data.isTncAccepted,
       };
     }
 
@@ -234,35 +233,7 @@ export const getCryptoCurrencies = async () => {
     return [];
   } catch (error) {
     console.error("Error fetching crypto currencies:", error);
-    // Return fallback data
-    return [
-      {
-        symbol: "ETH",
-        name: "Ethereum",
-        network: "ethereum",
-        networkDisplayName: "Ethereum",
-        image: null,
-        isAllowed: true,
-        isStable: false,
-        uniqueId: "ETHethereum",
-        roundOff: 8,
-        isSellAllowed: true,
-        kycCountriesNotSupported: [],
-      },
-      {
-        symbol: "BTC",
-        name: "Bitcoin",
-        network: "mainnet",
-        networkDisplayName: "Bitcoin",
-        image: null,
-        isAllowed: true,
-        isStable: false,
-        uniqueId: "BTCmainnet",
-        roundOff: 8,
-        isSellAllowed: true,
-        kycCountriesNotSupported: [],
-      },
-    ];
+    throw error;
   }
 };
 
@@ -500,32 +471,45 @@ export const refreshAccessToken = async (accessToken) => {
 /**
  * Update KYC user data with personal and address details
  * @param {string} accessToken - Access token from login
- * @param {Object} personalDetails - User personal details
- * @param {Object} addressDetails - User address details
+ * @param {Object} personalDetails - User personal details (optional)
+ * @param {Object} addressDetails - User address details (optional)
  * @returns {Promise<Object>} Update response
  */
 export const updateKYCUser = async (
   accessToken,
-  personalDetails,
-  addressDetails
+  personalDetails = {},
+  addressDetails = {}
 ) => {
   try {
-    const payload = {
-      personalDetails: {
+    const payload = {};
+
+    // Add personal details if provided
+    if (personalDetails && Object.keys(personalDetails).length > 0) {
+      payload.personalDetails = {
         firstName: personalDetails.firstName,
         lastName: personalDetails.lastName,
         mobileNumber: personalDetails.mobileNumber,
         dob: personalDetails.dateOfBirth,
-      },
-      addressDetails: {
+      };
+    }
+
+    // Add address details if provided
+    if (addressDetails && Object.keys(addressDetails).length > 0) {
+      payload.addressDetails = {
         addressLine1: addressDetails.addressLine1,
         addressLine2: addressDetails.addressLine2 || "",
         state: addressDetails.state,
         city: addressDetails.city,
         postCode: addressDetails.postalCode,
         countryCode: addressDetails.countryCode,
-      },
-    };
+      };
+    }
+
+    // If no data provided, skip the API call
+    if (Object.keys(payload).length === 0) {
+      console.log("No data to update, skipping API call");
+      return { success: true, data: { message: "No data to update" } };
+    }
 
     const response = await patch(
       ENDPOINTS.KYC_USER,
