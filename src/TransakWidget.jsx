@@ -164,7 +164,7 @@ export function TransakWidget() {
   // Handle OTP verification
   const handleOTPNext = async (otpData) => {
     console.log("OTP verified successfully:", otpData);
-    
+
     // Store auth token
     actions.setOtpData({
       authToken: otpData.authToken,
@@ -173,7 +173,10 @@ export function TransakWidget() {
 
     // Store user details if they were fetched in OTP component
     if (otpData.userDetails) {
-      console.log("Storing user details from OTP verification:", otpData.userDetails);
+      console.log(
+        "Storing user details from OTP verification:",
+        otpData.userDetails
+      );
       actions.setUserDetails(otpData.userDetails);
     }
 
@@ -491,10 +494,10 @@ export function TransakWidget() {
       )}
 
       {state.currentStep === "address" && (
-        <AddressStep 
+        <AddressStep
           userDetails={state.userDetails}
-          onBack={handleAddressBack} 
-          onNext={handleAddressNext} 
+          onBack={handleAddressBack}
+          onNext={handleAddressNext}
         />
       )}
 

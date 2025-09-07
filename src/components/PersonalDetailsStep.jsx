@@ -61,9 +61,11 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
       console.log("PersonalDetailsStep - Data availability check:", {
         hasContextUserData,
         hasPropsUserData,
-        contextUserDetails: contextUserDetails ? Object.keys(contextUserDetails) : null,
+        contextUserDetails: contextUserDetails
+          ? Object.keys(contextUserDetails)
+          : null,
         propsUserDetails: userDetails ? Object.keys(userDetails) : null,
-        authToken: !!otp.authToken
+        authToken: !!otp.authToken,
       });
 
       // If we have meaningful user data in context or props, don't fetch from API
@@ -102,15 +104,16 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
   useEffect(() => {
     // Prioritize context user details over props
     const effectiveUserDetails = state.userDetails || userDetails;
-    
+
     if (effectiveUserDetails) {
       console.log("Pre-filling form with user details:", {
         source: state.userDetails ? "context" : "props",
-        data: effectiveUserDetails
+        data: effectiveUserDetails,
       });
 
       // Extract personal details from different possible structures
-      const personalData = effectiveUserDetails.personalDetails || effectiveUserDetails;
+      const personalData =
+        effectiveUserDetails.personalDetails || effectiveUserDetails;
 
       // Parse mobile number to extract country code and number
       const mobileNumber =
@@ -292,8 +295,7 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
         personalDetails = {
           firstName: pd.firstName || pd.first_name || "",
           lastName: pd.lastName || pd.last_name || "",
-          mobileNumber:
-            pd.mobileNumber || pd.mobile_number || pd.phone || "",
+          mobileNumber: pd.mobileNumber || pd.mobile_number || pd.phone || "",
           dateOfBirth:
             pd.dateOfBirth || pd.date_of_birth || pd.dob || dateOfBirth,
         };

@@ -96,14 +96,18 @@ export function AddressStep({ userDetails, onBack, onNext }) {
       console.log("AddressStep - Data availability check:", {
         hasContextUserData,
         hasPropsUserData,
-        contextUserDetails: contextUserDetails ? Object.keys(contextUserDetails) : null,
+        contextUserDetails: contextUserDetails
+          ? Object.keys(contextUserDetails)
+          : null,
         propsUserDetails: userDetails ? Object.keys(userDetails) : null,
-        authToken: !!otp.authToken
+        authToken: !!otp.authToken,
       });
 
       // If we have meaningful user data in context or props, don't fetch from API
       if (hasContextUserData || hasPropsUserData) {
-        console.log("Using existing user details for address, skipping API call");
+        console.log(
+          "Using existing user details for address, skipping API call"
+        );
         return;
       }
 
@@ -133,29 +137,39 @@ export function AddressStep({ userDetails, onBack, onNext }) {
   useEffect(() => {
     // Prioritize context user details over props
     const effectiveUserDetails = state.userDetails || userDetails;
-    
+
     if (effectiveUserDetails) {
       console.log("Pre-filling address form with user details:", {
         source: state.userDetails ? "context" : "props",
-        data: effectiveUserDetails
+        data: effectiveUserDetails,
       });
 
       // Extract address details from different possible structures
-      const addressData = effectiveUserDetails.addressDetails || 
-                         effectiveUserDetails.address || 
-                         effectiveUserDetails;
+      const addressData =
+        effectiveUserDetails.addressDetails ||
+        effectiveUserDetails.address ||
+        effectiveUserDetails;
 
       // Pre-fill manual address form if we have address data
-      if (addressData && (addressData.addressLine1 || addressData.city || addressData.state)) {
+      if (
+        addressData &&
+        (addressData.addressLine1 || addressData.city || addressData.state)
+      ) {
         setManualAddress({
-          addressLine1: addressData.addressLine1 || addressData.address_line_1 || "",
-          addressLine2: addressData.addressLine2 || addressData.address_line_2 || "",
+          addressLine1:
+            addressData.addressLine1 || addressData.address_line_1 || "",
+          addressLine2:
+            addressData.addressLine2 || addressData.address_line_2 || "",
           city: addressData.city || "",
           state: addressData.state || addressData.region || "",
-          postalCode: addressData.postalCode || addressData.postal_code || addressData.zipCode || "",
+          postalCode:
+            addressData.postalCode ||
+            addressData.postal_code ||
+            addressData.zipCode ||
+            "",
           country: addressData.country || addressData.countryCode || "India",
         });
-        
+
         // If we have address data, show manual entry form
         if (addressData.addressLine1 || addressData.city) {
           setShowManualEntry(true);
