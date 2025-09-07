@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, MapPin } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
 import { getUserDetails, updateKYCUser } from "../api/index.js";
+import { TransakFooter } from "./TransakFooter.jsx";
 
 // Mock address suggestions (in real app, this would be from a geocoding API)
 const mockAddressSuggestions = [
@@ -715,10 +716,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
           </button>
 
           {/* Powered by Transak */}
-          <div className="text-center mt-4">
-            <span className="text-xs text-gray-500">Powered by </span>
-            <span className="text-xs text-gray-600 font-medium">Transak</span>
-          </div>
+          <TransakFooter className="text-center mt-4" />
         </div>
       </div>
     </div>

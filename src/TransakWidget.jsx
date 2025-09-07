@@ -13,6 +13,7 @@ import { AddressStep } from "./components/AddressStep.jsx";
 import { PurposeStep } from "./components/PurposeStep.jsx";
 import { KYCIframeStep } from "./components/KYCIframeStep.jsx";
 import { KYBFormStep } from "./components/KYBFormStep.jsx";
+import { TransakFooter } from "./components/TransakFooter.jsx";
 import {
   useQuote,
   useCryptoCurrencies,
@@ -22,17 +23,6 @@ import { useTransakState } from "./context/TransakContext.jsx";
 
 export function TransakWidget() {
   const { state, actions } = useTransakState();
-  const {
-    quote: contextQuote,
-    wallet: contextWallet,
-    email: contextEmail,
-    otp: contextOtp,
-    personalDetails: contextPersonalDetails,
-    address: contextAddress,
-    purpose: contextPurpose,
-    currentStep: contextCurrentStep,
-  } = state;
-
   const [fiatAmount, setFiatAmount] = useState("250");
   const [selectedPayment, setSelectedPayment] = useState("sepa_bank_transfer");
   const [selectedFiatCurrency, setSelectedFiatCurrency] = useState("EUR");
@@ -327,7 +317,7 @@ export function TransakWidget() {
     <>
       {state.currentStep === "quote" && (
         <div className="w-full max-w-md mx-auto">
-          <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
             {/* Header with Buy title and menu */}
             <div className="flex items-center justify-between p-6 pb-4">
               <div className="flex gap-6">
@@ -337,126 +327,128 @@ export function TransakWidget() {
               </div>
             </div>
 
-            <div className="px-6 pb-6 space-y-6">
-              {/* You pay section */}
-              <div className="space-y-3">
+            <div className="px-6 flex-1 flex flex-col justify-between">
+              <div className="space-y-6">
                 {/* You pay section */}
-                <div
-                  className={`flex items-center rounded-lg overflow-hidden ${
-                    hasMinAmountError ? "border-red-500 " : ""
-                  }`}
-                >
-                  {/* Input side */}
-                  <div className="flex-1 p-2 border-2 border-gey-300">
-                    <span className="text-gray-500 text-sm block">You pay</span>
-                    <input
-                      type="number"
-                      value={fiatAmount}
-                      onChange={(e) => setFiatAmount(e.target.value)}
-                      className={`w-full text-2xl font-light bg-transparent outline-none border-none placeholder:text-gray-400 ${
-                        hasMinAmountError ? "text-red-600" : "text-gray-900"
-                      }`}
-                      placeholder="250"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-
-                  {/* Dropdown side */}
-                  <div className="border-2 border-gray-300">
-                    <FiatCurrencySelector
-                      selectedCurrency={selectedFiatCurrency}
-                      onCurrencyChange={handleFiatCurrencyChange}
-                    />
-                  </div>
-                </div>
-
-                {hasMinAmountError && (
-                  <div className="text-sm text-red-500 mt-2 flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
+                <div className="space-y-3">
+                  {/* You pay section */}
+                  <div
+                    className={`flex items-center rounded-lg overflow-hidden ${
+                      hasMinAmountError ? "border-red-500" : ""
+                    }`}
+                  >
+                    {/* Input side */}
+                    <div className="flex-1 p-2 border-2 border-gray-300">
+                      <span className="text-gray-500 text-sm block">
+                        You pay
+                      </span>
+                      <input
+                        type="number"
+                        value={fiatAmount}
+                        onChange={(e) => setFiatAmount(e.target.value)}
+                        className={`w-full text-2xl font-light bg-transparent outline-none border-none placeholder:text-gray-400 ${
+                          hasMinAmountError ? "text-red-600" : "text-gray-900"
+                        }`}
+                        placeholder="250"
+                        min="0"
+                        step="0.01"
                       />
-                    </svg>
-                    {hasMinAmountError}
-                  </div>
-                )}
-              </div>
+                    </div>
 
-              {/* Payment methods */}
-              <PaymentMethodSelector
-                selectedPayment={selectedPayment}
-                onPaymentChange={handlePaymentChange}
-                paymentOptions={selectedFiatCurrencyObj?.paymentOptions || []}
-                showFees={showFees}
-                onToggleFees={() => setShowFees(!showFees)}
-                feeBreakdown={displayValues.feeBreakdown}
-                totalFees={displayValues.totalFees}
-                selectedFiatCurrency={selectedFiatCurrency}
-                conversionRate={displayValues.pricePerCrypto}
-                selectedCryptoSymbol={selectedCryptoData?.symbol || "ETH"}
-              />
-
-              {/* You receive section */}
-              <div className="space-y-3">
-                <div className="flex items-center rounded-lg overflow-hidden">
-                  {/* Input side */}
-                  <div className="flex-1 p-2 border-2 border-gray-300">
-                    <span className="text-gray-500 text-sm block">
-                      You receive (estimate)
-                    </span>
-                    <div className="text-2xl font-light text-gray-900">
-                      {quoteLoading ? (
-                        <span className="text-gray-400">Loading...</span>
-                      ) : quoteError ? (
-                        <span className="text-red-400">Error</span>
-                      ) : quote ? (
-                        displayValues.cryptoAmount
-                      ) : (
-                        <span className="text-gray-400">0.00000000</span>
-                      )}
-                      {quoteError && (
-                        <span className="text-xs text-red-500 ml-2">
-                          (API Error)
-                        </span>
-                      )}
+                    {/* Dropdown side */}
+                    <div className="border-2 border-gray-300">
+                      <FiatCurrencySelector
+                        selectedCurrency={selectedFiatCurrency}
+                        onCurrencyChange={handleFiatCurrencyChange}
+                      />
                     </div>
                   </div>
 
-                  {/* Dropdown side */}
-                  <div className="border-2 border-gray-300">
-                    <CryptoCurrencySelector
-                      selectedCurrency={selectedCryptoCurrency}
-                      onCurrencyChange={setSelectedCryptoCurrency}
-                    />
+                  {hasMinAmountError && (
+                    <div className="text-sm text-red-500 mt-2 flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4 flex-shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      {hasMinAmountError}
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment methods */}
+                <PaymentMethodSelector
+                  selectedPayment={selectedPayment}
+                  onPaymentChange={handlePaymentChange}
+                  paymentOptions={selectedFiatCurrencyObj?.paymentOptions || []}
+                  showFees={showFees}
+                  onToggleFees={() => setShowFees(!showFees)}
+                  feeBreakdown={displayValues.feeBreakdown}
+                  totalFees={displayValues.totalFees}
+                  selectedFiatCurrency={selectedFiatCurrency}
+                  conversionRate={displayValues.pricePerCrypto}
+                  selectedCryptoSymbol={selectedCryptoData?.symbol || "ETH"}
+                />
+
+                {/* You receive section */}
+                <div className="space-y-3">
+                  <div className="flex items-center rounded-lg overflow-hidden">
+                    {/* Input side */}
+                    <div className="flex-1 p-2 border-2 border-gray-300">
+                      <span className="text-gray-500 text-sm block">
+                        You receive (estimate)
+                      </span>
+                      <div className="text-2xl font-light text-gray-900">
+                        {quoteLoading ? (
+                          <span className="text-gray-400">Loading...</span>
+                        ) : quoteError ? (
+                          <span className="text-red-400">Error</span>
+                        ) : quote ? (
+                          displayValues.cryptoAmount
+                        ) : (
+                          <span className="text-gray-400">0.00000000</span>
+                        )}
+                        {quoteError && (
+                          <span className="text-xs text-red-500 ml-2">
+                            (API Error)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Dropdown side */}
+                    <div className="border-2 border-gray-300">
+                      <CryptoCurrencySelector
+                        selectedCurrency={selectedCryptoCurrency}
+                        onCurrencyChange={setSelectedCryptoCurrency}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <button
-                onClick={handleBuyNowClick}
-                disabled={hasMinAmountError || !quote || quoteLoading}
-                className={`w-full h-12 text-lg font-medium rounded-xl transition-colors ${
-                  hasMinAmountError || !quote || quoteLoading
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-              >
-                {quoteLoading ? "Loading..." : "Buy Now"}
-              </button>
+              {/* Bottom section with button and footer */}
+              <div className="space-y-4 pb-6">
+                <button
+                  onClick={handleBuyNowClick}
+                  disabled={hasMinAmountError || !quote || quoteLoading}
+                  className={`w-full h-12 text-lg font-medium rounded-xl transition-colors ${
+                    hasMinAmountError || !quote || quoteLoading
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
+                >
+                  {quoteLoading ? "Loading..." : "Buy Now"}
+                </button>
 
-              {/* Powered by Transak */}
-              <div className="text-center">
-                <span className="text-xs text-gray-500">Powered by </span>
-                <span className="text-xs text-gray-600 font-medium">
-                  Transak
-                </span>
+                {/* Powered by Transak */}
+                <TransakFooter />
               </div>
             </div>
           </div>

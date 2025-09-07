@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, Upload, Check, AlertCircle } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
+import { TransakFooter } from "./TransakFooter.jsx";
 
 export function KYBFormStep({ onBack, onNext }) {
   const { state } = useTransakState();
@@ -1485,8 +1486,8 @@ export function KYBFormStep({ onBack, onNext }) {
   const isLastSection = currentSection === sections.length - 1;
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="w-full min-h-[90vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    <div className="w-full max-w-md mx-auto">
+      <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 bg-white">
           <button
@@ -1522,7 +1523,7 @@ export function KYBFormStep({ onBack, onNext }) {
         </div>
 
         {/* Content */}
-        <div className="p-6 max-h-[70vh] overflow-y-auto">
+        <div className="p-6 max-h-[calc(80vh-12rem)] overflow-y-auto">
           {renderSection()}
         </div>
 
@@ -1567,10 +1568,7 @@ export function KYBFormStep({ onBack, onNext }) {
           </div>
 
           {/* Powered by Transak */}
-          <div className="text-center mt-4">
-            <span className="text-xs text-gray-500">Powered by </span>
-            <span className="text-xs text-gray-600 font-medium">Transak</span>
-          </div>
+          <TransakFooter className="text-center mt-4" />
         </div>
       </div>
     </div>

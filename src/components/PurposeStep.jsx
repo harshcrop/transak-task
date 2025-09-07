@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
 import { submitPurposeOfUsage, getKYCRequirements } from "../api/index.js";
+import { TransakFooter } from "./TransakFooter.jsx";
 
 const purposeOptions = [
   {
@@ -281,10 +282,7 @@ export function PurposeStep({
           </button>
 
           {/* Powered by Transak */}
-          <div className="text-center mt-4">
-            <span className="text-xs text-gray-500">Powered by </span>
-            <span className="text-xs text-gray-600 font-medium">Transak</span>
-          </div>
+          <TransakFooter className="text-center mt-4" />
         </div>
       </div>
     </div>

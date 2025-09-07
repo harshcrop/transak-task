@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { verifyEmailOTP, sendEmailOTP, getUserDetails } from "../api/index.js";
+import { TransakFooter } from "./TransakFooter.jsx";
 
 export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -260,7 +261,7 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-4 p-6 border-b border-gray-200">
           <button
@@ -275,143 +276,145 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
           </h2>
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Instructions */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-700">
-              You will receive a verification code at{" "}
-              <span className="font-medium text-gray-900">{email}</span>. Check
-              your spam folder in case you cannot find it in your inbox.
-            </p>
-          </div>
+        <div className="p-6 flex-1 flex flex-col justify-between">
+          <div className="space-y-6">
+            {/* Instructions */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-700">
+                You will receive a verification code at{" "}
+                <span className="font-medium text-gray-900">{email}</span>.
+                Check your spam folder in case you cannot find it in your inbox.
+              </p>
+            </div>
 
-          {/* OTP Input */}
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Verification Code
-            </label>
+            {/* OTP Input */}
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Verification Code
+              </label>
 
-            <div className="flex gap-3 justify-center">
-              {otp.map((digit, index) => (
+              <div className="flex gap-3 justify-center">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) =>
+                      handleOtpChange(index, e.target.value.replace(/\D/g, ""))
+                    }
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={index === 0 ? handlePaste : undefined}
+                    className={`w-12 h-12 text-center text-xl font-medium border-2 rounded-lg outline-none transition-colors ${
+                      otpError
+                        ? "border-red-500 bg-red-50"
+                        : digit
+                        ? "border-green-500 bg-green-50"
+                        : "border-gray-200 focus:border-blue-500"
+                    }`}
+                    disabled={isVerifying}
+                  />
+                ))}
+              </div>
+
+              {/* Error Message */}
+              {otpError && (
+                <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg text-center">
+                  {otpError}
+                </div>
+              )}
+            </div>
+
+            {/* Terms Agreement */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
                 <input
-                  key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) =>
-                    handleOtpChange(index, e.target.value.replace(/\D/g, ""))
-                  }
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  onPaste={index === 0 ? handlePaste : undefined}
-                  className={`w-12 h-12 text-center text-xl font-medium border-2 rounded-lg outline-none transition-colors ${
-                    otpError
-                      ? "border-red-500 bg-red-50"
-                      : digit
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200 focus:border-blue-500"
-                  }`}
+                  type="checkbox"
+                  id="terms-checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => {
+                    setTermsAccepted(e.target.checked);
+                    // Clear error when user accepts terms
+                    if (e.target.checked && otpError.includes("Terms of Use")) {
+                      setOtpError("");
+                    }
+                  }}
+                  className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   disabled={isVerifying}
                 />
-              ))}
+                <label
+                  htmlFor="terms-checkbox"
+                  className="text-sm text-gray-600 cursor-pointer"
+                >
+                  I agree with Transak's{" "}
+                  <button
+                    type="button"
+                    className="text-blue-600 hover:underline"
+                    onClick={() =>
+                      window.open("https://transak.com/terms-of-use", "_blank")
+                    }
+                  >
+                    Terms of Use
+                  </button>{" "}
+                  and{" "}
+                  <button
+                    type="button"
+                    className="text-blue-600 hover:underline"
+                    onClick={() =>
+                      window.open(
+                        "https://transak.com/privacy-policy",
+                        "_blank"
+                      )
+                    }
+                  >
+                    Privacy Policy
+                  </button>
+                  .
+                </label>
+              </div>
             </div>
 
-            {/* Error Message */}
-            {otpError && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg text-center">
-                {otpError}
-              </div>
-            )}
-          </div>
+            {/* Continue Button */}
+            <button
+              onClick={() => handleVerifyOtp()}
+              disabled={!canContinue || isVerifying}
+              className={`w-full h-12 text-lg font-medium rounded-xl transition-colors ${
+                !canContinue || isVerifying
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+            >
+              {isVerifying ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Verifying...
+                </div>
+              ) : (
+                "Continue"
+              )}
+            </button>
 
-          {/* Terms Agreement */}
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                id="terms-checkbox"
-                checked={termsAccepted}
-                onChange={(e) => {
-                  setTermsAccepted(e.target.checked);
-                  // Clear error when user accepts terms
-                  if (e.target.checked && otpError.includes("Terms of Use")) {
-                    setOtpError("");
-                  }
-                }}
-                className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                disabled={isVerifying}
-              />
-              <label
-                htmlFor="terms-checkbox"
-                className="text-sm text-gray-600 cursor-pointer"
-              >
-                I agree with Transak's{" "}
+            {/* Resend OTP */}
+            <div className="text-center">
+              {canResend ? (
                 <button
-                  type="button"
-                  className="text-blue-600 hover:underline"
-                  onClick={() =>
-                    window.open("https://transak.com/terms-of-use", "_blank")
-                  }
+                  onClick={handleResendOtp}
+                  className="text-blue-600 hover:underline text-sm"
                 >
-                  Terms of Use
-                </button>{" "}
-                and{" "}
-                <button
-                  type="button"
-                  className="text-blue-600 hover:underline"
-                  onClick={() =>
-                    window.open("https://transak.com/privacy-policy", "_blank")
-                  }
-                >
-                  Privacy Policy
+                  Resend verification code
                 </button>
-                .
-              </label>
+              ) : (
+                <p className="text-sm text-gray-500">
+                  Resend code in {resendTimer}s
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Continue Button */}
-          <button
-            onClick={() => handleVerifyOtp()}
-            disabled={!canContinue || isVerifying}
-            className={`w-full h-12 text-lg font-medium rounded-xl transition-colors ${
-              !canContinue || isVerifying
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}
-          >
-            {isVerifying ? (
-              <div className="flex items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Verifying...
-              </div>
-            ) : (
-              "Continue"
-            )}
-          </button>
-
-          {/* Resend OTP */}
-          <div className="text-center">
-            {canResend ? (
-              <button
-                onClick={handleResendOtp}
-                className="text-blue-600 hover:underline text-sm"
-              >
-                Resend verification code
-              </button>
-            ) : (
-              <p className="text-sm text-gray-500">
-                Resend code in {resendTimer}s
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Powered by Transak */}
-        <div className="absolute bottom-4 left-0 right-0 text-center">
-          <span className="text-xs text-gray-500">Powered by </span>
-          <span className="text-xs text-gray-600 font-medium">Transak</span>
+          {/* Powered by Transak Footer */}
+          <TransakFooter />
         </div>
       </div>
     </div>

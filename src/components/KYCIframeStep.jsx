@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
+import { TransakFooter } from "./TransakFooter.jsx";
+import { KYBFormStep } from "./KYBFormStep.jsx";
 
 export function KYCIframeStep({ onBack, onNext }) {
+  // TEST FLAG: Set to true to load KYB form instead of KYC iframe for testing
+  const TEST_LOAD_KYB_INSTEAD_OF_KYC = true;
+
   const { state } = useTransakState();
   const { kycProcess } = state;
   const [isLoading, setIsLoading] = useState(true);
@@ -62,9 +67,26 @@ export function KYCIframeStep({ onBack, onNext }) {
     });
   };
 
+  // Handle KYB form completion when testing with KYB instead of KYC
+  const handleKYBNext = (kybData) => {
+    console.log("KYB form completed in KYC step:", kybData);
+    // Complete the KYC step with KYB data
+    onNext({
+      kycCompleted: true,
+      kybCompleted: true,
+      kybData: kybData,
+      timestamp: new Date().toISOString(),
+    });
+  };
+
+  // If test flag is enabled, render KYB form instead of KYC iframe
+  if (TEST_LOAD_KYB_INSTEAD_OF_KYC) {
+    return <KYBFormStep onBack={onBack} onNext={handleKYBNext} />;
+  }
+
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="w-full h-[90vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    <div className="w-full max-w-md mx-auto">
+      <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 bg-white relative z-10">
           <button
@@ -108,7 +130,7 @@ export function KYCIframeStep({ onBack, onNext }) {
         </div>
 
         {/* Main content */}
-        <div className="relative flex-1 h-[calc(90vh-12rem)]">
+        <div className="relative flex-1 h-[calc(80vh-12rem)]">
           {/* Show loading if requirements are being fetched */}
           {!kycProcess.requirementsFetched ? (
             <div className="flex items-center justify-center h-full">
@@ -208,10 +230,7 @@ export function KYCIframeStep({ onBack, onNext }) {
             </div>
 
             {/* Powered by Transak */}
-            <div className="text-center mt-4">
-              <span className="text-xs text-gray-500">Powered by </span>
-              <span className="text-xs text-gray-600 font-medium">Transak</span>
-            </div>
+            <TransakFooter className="text-center mt-4" />
           </div>
         )}
       </div>

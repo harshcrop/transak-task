@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import transakService from "../api/transakService.js";
+import { TransakFooter } from "./TransakFooter.jsx";
 
 export function WalletAddressStep({
   selectedCryptoData,
@@ -63,7 +64,7 @@ export function WalletAddressStep({
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-4 p-6 border-b border-gray-200">
           <button
@@ -77,7 +78,8 @@ export function WalletAddressStep({
           </h2>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6 flex-1 flex flex-col justify-between">
+          <div className="space-y-6">
           {/* Wallet Address Input */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -163,12 +165,10 @@ export function WalletAddressStep({
               )}
             </button>
           </form>
-        </div>
+          </div>
 
-        {/* Powered by Transak */}
-        <div className="text-center p-4 border-t border-gray-200">
-          <span className="text-xs text-gray-500">Powered by </span>
-          <span className="text-xs text-gray-600 font-medium">Transak</span>
+          {/* Powered by Transak Footer */}
+          <TransakFooter />
         </div>
       </div>
     </div>
