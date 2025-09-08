@@ -438,7 +438,7 @@ export function TransakWidget() {
                 <button
                   onClick={handleBuyNowClick}
                   disabled={hasMinAmountError || !quote || quoteLoading}
-                  className={`w-full h-12 text-lg font-medium rounded-xl transition-colors ${
+                  className={`w-full h-12 text-lg font-medium rounded-xl cursor-pointer transition-colors ${
                     hasMinAmountError || !quote || quoteLoading
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700 text-white"

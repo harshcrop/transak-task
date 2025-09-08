@@ -85,7 +85,7 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex p-[1.25rem] items-center gap-2 bg-gray-100 hover:bg-gray-50 transition-colors text-lg font-medium min-w-[120px] h-full"
+        className="flex p-[1.25rem] items-center gap-2 bg-gray-100 hover:bg-gray-50 transition-colors text-lg font-medium min-w-[120px] h-full cursor-pointer"
       >
         {selectedCurrencyData && (
           <div className="w-5 h-5 flex items-center justify-center">
@@ -110,7 +110,7 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <button
                   onClick={handleCloseModal}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-700" />
                 </button>
@@ -186,7 +186,7 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
                       <button
                         key={currency.uniqueId || currency.symbol}
                         onClick={() => handleCurrencySelect(currency)}
-                        className={`w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 ${
+                        className={`w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer ${
                           currency.uniqueId === selectedCurrency ||
                           currency.symbol === selectedCurrency
                             ? ""

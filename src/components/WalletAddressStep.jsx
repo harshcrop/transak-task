@@ -78,8 +78,8 @@ export function WalletAddressStep({
           </h2>
         </div>
 
-        <div className="p-6 flex-1 flex flex-col justify-between">
-          <div className="space-y-6">
+        <div className="p-6 flex-1 flex flex-col">
+          <div className="flex-1">
             {/* Wallet Address Input */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -142,33 +142,35 @@ export function WalletAddressStep({
                   </div>
                 )}
               </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isValidating || isValid || !walletAddress.trim()}
-                className={`w-full h-12 text-lg font-medium rounded-xl transition-colors ${
-                  isValidating || isValid || !walletAddress.trim()
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-              >
-                {isValidating ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Validating...
-                  </div>
-                ) : isValid ? (
-                  "Proceeding..."
-                ) : (
-                  `Buy ${selectedCryptoData?.symbol || "ETH"}`
-                )}
-              </button>
             </form>
           </div>
 
-          {/* Powered by Transak Footer */}
-          <TransakFooter />
+          <div className="space-y-4">
+            {/* Submit Button */}
+            <button
+              onClick={handleWalletValidation}
+              disabled={isValidating || isValid || !walletAddress.trim()}
+              className={`w-full h-12 text-lg font-medium rounded-xl cursor-pointer transition-colors ${
+                isValidating || isValid || !walletAddress.trim()
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+            >
+              {isValidating ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Validating...
+                </div>
+              ) : isValid ? (
+                "Proceeding..."
+              ) : (
+                `Buy ${selectedCryptoData?.symbol || "ETH"}`
+              )}
+            </button>
+
+            {/* Powered by Transak Footer */}
+            <TransakFooter />
+          </div>
         </div>
       </div>
     </div>

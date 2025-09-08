@@ -72,8 +72,8 @@ export function EmailEntryStep({ onBack, onNext }) {
           </h2>
         </div>
 
-        <div className="p-6 flex-1 flex flex-col justify-between">
-          <div className="space-y-6">
+        <div className="p-6 flex-1 flex flex-col">
+          <div className="flex-1">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 {/* <label className="block text-sm font-medium text-gray-700">
@@ -103,31 +103,33 @@ export function EmailEntryStep({ onBack, onNext }) {
                   </div>
                 )}
               </div>
-
-              {/* Continue Button */}
-              <button
-                type="submit"
-                disabled={!email.trim() || isLoading}
-                className={`w-full h-12 text-lg font-medium rounded-xl transition-colors flex items-center justify-center gap-2 ${
-                  !email.trim() || isLoading
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Sending OTP...
-                  </>
-                ) : (
-                  "Continue"
-                )}
-              </button>
             </form>
           </div>
 
-          {/* Powered by Transak Footer */}
-          <TransakFooter />
+          <div className="space-y-4">
+            {/* Continue Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={!email.trim() || isLoading}
+              className={`w-full h-12 text-lg font-medium rounded-xl transition-colors flex items-center justify-center gap-2 ${
+                !email.trim() || isLoading
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Sending OTP...
+                </>
+              ) : (
+                "Continue"
+              )}
+            </button>
+
+            {/* Powered by Transak Footer */}
+            <TransakFooter />
+          </div>
         </div>
       </div>
     </div>

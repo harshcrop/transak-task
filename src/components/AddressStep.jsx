@@ -310,7 +310,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
           <button
             onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
@@ -403,7 +403,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
                       }
                     }, 100);
                   }}
-                  className="text-blue-600 text-sm hover:text-blue-700"
+                  className="text-blue-600 text-sm hover:text-blue-700 cursor-pointer"
                 >
                   Add Address Manually
                 </button>
@@ -434,7 +434,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
                         <button
                           key={address.id}
                           onClick={() => handleAddressSelect(address)}
-                          className="w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-start gap-3 transition-colors"
+                          className="w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-start gap-3 transition-colors cursor-pointer"
                         >
                           <MapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                           <div className="min-w-0 flex-1">
@@ -492,7 +492,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
                       }
                     }, 100);
                   }}
-                  className="text-blue-600 text-sm hover:text-blue-700"
+                  className="text-blue-600 text-sm hover:text-blue-700 cursor-pointer"
                 >
                   Search Address
                 </button>
@@ -642,7 +642,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
           <button
             onClick={handleContinue}
             disabled={isLoading}
-            className={`w-full h-12 text-lg font-medium rounded-xl transition-colors ${
+            className={`w-full h-12 text-lg font-medium rounded-xl cursor-pointer transition-colors ${
               isLoading
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : (showManualEntry &&

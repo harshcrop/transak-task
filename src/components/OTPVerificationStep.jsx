@@ -1,30 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { verifyEmailOTP, sendEmailOTP, getUserDetails } from "../api/index.js";
+import { verifyEmailOTP, getUserDetails } from "../api/index.js";
 import { TransakFooter } from "./TransakFooter.jsx";
 
 export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpError, setOtpError] = useState("");
-  const [resendTimer, setResendTimer] = useState(60);
-  const [canResend, setCanResend] = useState(false);
-  const [currentStateToken, setCurrentStateToken] = useState(stateToken);
+  const [currentStateToken] = useState(stateToken);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const inputRefs = useRef([]);
-
-  // Timer countdown effect
-  useEffect(() => {
-    let interval;
-    if (resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
-    } else {
-      setCanResend(true);
-    }
-    return () => clearInterval(interval);
-  }, [resendTimer]);
 
   const handleOtpChange = (index, value) => {
     // Only allow single digit
@@ -230,32 +215,6 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
     }
   };
 
-  const handleResendOtp = async () => {
-    if (!canResend) return;
-
-    try {
-      // Call the API to resend OTP
-      const response = await sendEmailOTP(email);
-
-      if (response.success) {
-        // Update the state token with the new one from resend
-        setCurrentStateToken(response.stateToken);
-
-        // Reset timer and state
-        setResendTimer(60);
-        setCanResend(false);
-        setOtpError("");
-        setOtp(["", "", "", "", "", ""]);
-        inputRefs.current[0]?.focus();
-      } else {
-        setOtpError("Failed to resend code. Please try again.");
-      }
-    } catch (error) {
-      console.error("Resend OTP error:", error);
-      setOtpError(error.message || "Failed to resend code. Please try again.");
-    }
-  };
-
   const isOtpComplete = otp.every((digit) => digit !== "");
   const canContinue = isOtpComplete && termsAccepted;
 
@@ -276,8 +235,8 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
           </h2>
         </div>
 
-        <div className="p-6 flex-1 flex flex-col justify-between">
-          <div className="space-y-6">
+        <div className="p-6 flex-1 flex flex-col">
+          <div className="flex-1 space-y-6">
             {/* Instructions */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-sm text-gray-700">
@@ -375,7 +334,9 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
                 </label>
               </div>
             </div>
+          </div>
 
+          <div className="space-y-4">
             {/* Continue Button */}
             <button
               onClick={() => handleVerifyOtp()}
@@ -395,10 +356,10 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
                 "Continue"
               )}
             </button>
-          </div>
 
-          {/* Powered by Transak Footer */}
-          <TransakFooter />
+            {/* Powered by Transak Footer */}
+            <TransakFooter />
+          </div>
         </div>
       </div>
     </div>

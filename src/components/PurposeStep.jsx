@@ -36,17 +36,10 @@ export function PurposeStep({
   const [selectedPurpose, setSelectedPurpose] = useState(initialPurpose);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log("PurposeStep - Current quote state:", quote);
-
-  // Test function to manually trigger additional requirements API
-  const testAdditionalRequirements = async () => {
-    console.log("🧪 Testing additional requirements API...");
+  // Fetch additional KYC requirements
+  const fetchAdditionalKYCRequirements = async () => {
     try {
       if (!otp.authToken || !quote?.quote?.quoteId) {
-        console.log("❌ Missing required data:", {
-          hasToken: !!otp.authToken,
-          hasQuoteId: !!quote?.quote?.quoteId,
-        });
         return;
       }
 
@@ -54,95 +47,60 @@ export function PurposeStep({
         otp.authToken,
         quote.quote.quoteId
       );
-      console.log("✅ Test response:", response);
 
-      // Store the response in context for testing
       const responseData = response.data || response;
       if (responseData) {
-        const extractedKycUrl =
-          responseData?.formsRequired?.[0]?.metadata?.kycUrl;
-        console.log("🔗 Test extracted KYC URL:", extractedKycUrl);
         actions.setKYCAdditionalRequirements(responseData);
-        console.log("✅ Test data stored in context");
       }
     } catch (error) {
-      console.error("❌ Test error:", error);
+      console.error("Error fetching additional KYC requirements:", error);
     }
   };
 
   const handleContinue = async () => {
     if (!selectedPurpose) return;
 
-    console.log("🚀 handleContinue started");
     setIsLoading(true);
 
     const selectedOption = purposeOptions.find(
       (option) => option.id === selectedPurpose
     );
-    console.log("📝 Selected option:", selectedOption);
 
     try {
       // Submit purpose of usage to API
       if (otp.authToken) {
-        console.log("🔑 Auth token available, starting API calls");
         try {
-          console.log("📤 Submitting purpose of usage...");
-
           const purposeList = [selectedOption?.title];
-          const response = await submitPurposeOfUsage(
-            otp.authToken,
-            purposeList
-          );
-          console.log("✅ Purpose of usage response:", response);
+          await submitPurposeOfUsage(otp.authToken, purposeList);
 
           // Mark purpose as submitted
           actions.setKYCPurposeSubmitted(true);
-          console.log("✅ Purpose marked as submitted");
 
           // Fetch KYC requirements if we have a quote
           if (quote?.quote?.quoteId) {
-            console.log("📊 Quote ID available:", quote.quote.quoteId);
             try {
-              console.log(
-                "📤 Fetching KYC requirements with quote ID:",
-                quote.quote.quoteId
-              );
               const kycResponse = await getKYCRequirements(
                 otp.authToken,
                 quote.quote.quoteId
               );
-              testAdditionalRequirements();
-              console.log("✅ KYC requirements response:", kycResponse);
+
+              // Fetch additional requirements
+              await fetchAdditionalKYCRequirements();
 
               // Store KYC requirements - handle both response formats
               const kycData = kycResponse.data || kycResponse;
 
               // Check if we received valid KYC requirements
               if (kycData && kycData.formsRequired) {
-                console.log("✅ Valid KYC requirements found, storing...");
                 actions.setKYCRequirements(kycData);
 
                 // After successfully getting KYC requirements, fetch additional requirements
-                console.log("🔍 Now fetching additional requirements...");
                 try {
-                  console.log(
-                    "🔍 Starting to fetch KYC additional requirements with quote ID:",
-                    quote.quote.quoteId
-                  );
-                  console.log(
-                    "🔑 Using auth token:",
-                    otp.authToken ? "✅ Present" : "❌ Missing"
-                  );
-
                   const additionalRequirementsResponse =
                     await getKYCAdditionalRequirements(
                       otp.authToken,
                       quote.quote.quoteId
                     );
-                  console.log(
-                    "✅ KYC additional requirements response:",
-                    additionalRequirementsResponse
-                  );
 
                   // Store additional requirements - handle both response formats
                   const additionalRequirementsData =
@@ -151,75 +109,42 @@ export function PurposeStep({
 
                   // Check if we received valid additional requirements
                   if (additionalRequirementsData) {
-                    // Extract and log the kycUrl before storing
-                    const extractedKycUrl =
-                      additionalRequirementsData?.formsRequired?.[0]?.metadata
-                        ?.kycUrl;
-                    console.log("🔗 Extracted KYC URL:", extractedKycUrl);
-
                     actions.setKYCAdditionalRequirements(
-                      additionalRequirementsData
-                    );
-                    console.log(
-                      "✅ KYC additional requirements stored successfully:",
-                      additionalRequirementsData
-                    );
-                    console.log(
-                      "🎯 KYC URL should now be available in context"
-                    );
-                  } else {
-                    console.error(
-                      "❌ Invalid KYC additional requirements response:",
                       additionalRequirementsData
                     );
                   }
                 } catch (additionalRequirementsError) {
                   console.error(
-                    "❌ Error fetching KYC additional requirements:",
+                    "Error fetching KYC additional requirements:",
                     additionalRequirementsError
                   );
-                  console.error("❌ Error details:", {
-                    message: additionalRequirementsError.message,
-                    status: additionalRequirementsError.status,
-                    data: additionalRequirementsError.data,
-                  });
                   // Don't throw here - additional requirements might be optional
                 }
               } else {
-                console.error("❌ Invalid KYC requirements response:", kycData);
                 throw new Error("Invalid KYC requirements response");
               }
             } catch (kycError) {
-              console.error("❌ Error fetching KYC requirements:", kycError);
+              console.error("Error fetching KYC requirements:", kycError);
               // Re-throw the error to handle it properly
               throw kycError;
             }
           } else {
-            console.warn(
-              "❌ No quote ID available for KYC requirements. Quote:",
-              quote
-            );
             throw new Error("No quote ID available for KYC requirements");
           }
         } catch (apiError) {
-          console.error("❌ Error in API calls section:", apiError);
+          console.error("Error in API calls:", apiError);
           // Don't re-throw the error - we still want to proceed to next step
-          console.log("⚠️ Proceeding to next step despite API errors");
         }
-      } else {
-        console.warn("❌ No auth token available");
       }
 
-      console.log("✅ All processing completed, proceeding to next step");
       onNext({
         purposeId: selectedPurpose,
         purposeTitle: selectedOption?.title,
         purposeDescription: selectedOption?.description,
       });
     } catch (error) {
-      console.error("❌ Error in handleContinue:", error);
+      console.error("Error in handleContinue:", error);
       // Even if there's an error, we should still try to proceed
-      console.log("⚠️ Attempting to proceed despite errors");
       onNext({
         purposeId: selectedPurpose,
         purposeTitle: selectedOption?.title,
@@ -227,7 +152,6 @@ export function PurposeStep({
       });
     } finally {
       setIsLoading(false);
-      console.log("🏁 handleContinue finished");
     }
   };
 
@@ -342,14 +266,6 @@ export function PurposeStep({
 
         {/* Footer */}
         <div className="p-6 border-t border-gray-100">
-          {/* Test button for debugging */}
-          {/* <button
-            onClick={testAdditionalRequirements}
-            className="w-full mb-2 h-8 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors"
-          >
-            🧪 Test Additional Requirements API
-          </button> */}
-
           <button
             onClick={handleContinue}
             disabled={!selectedPurpose || isLoading}
