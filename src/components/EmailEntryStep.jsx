@@ -76,9 +76,9 @@ export function EmailEntryStep({ onBack, onNext }) {
           <div className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
+                {/* <label className="block text-sm font-medium text-gray-700">
                   Email
-                </label>
+                </label> */}
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                     <Mail className="w-5 h-5 text-gray-400" />

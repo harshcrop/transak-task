@@ -1,58 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronLeft, MapPin } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
 import { getUserDetails, updateKYCUser } from "../api/index.js";
 import { TransakFooter } from "./TransakFooter.jsx";
-
-// Mock address suggestions (in real app, this would be from a geocoding API)
-const mockAddressSuggestions = [
-  {
-    id: 1,
-    name: "Apple Woods",
-    fullAddress: "Galleria Mall Service Road, Ahmedabad, Gujarat, India",
-    city: "Ahmedabad",
-    state: "Gujarat",
-    country: "India",
-    postalCode: "380057",
-  },
-  {
-    id: 2,
-    name: "Applewood",
-    fullAddress:
-      "Heights Secondary School Bloor Street, Mississauga, ON, Canada",
-    city: "Mississauga",
-    state: "Ontario",
-    country: "Canada",
-    postalCode: "L4Y 2N7",
-  },
-  {
-    id: 3,
-    name: "Applewood",
-    fullAddress: "Golf Course West 32nd Avenue, Golden, CO, USA",
-    city: "Golden",
-    state: "Colorado",
-    country: "USA",
-    postalCode: "80401",
-  },
-  {
-    id: 4,
-    name: "Applewood",
-    fullAddress: "CO, USA",
-    city: "Golden",
-    state: "Colorado",
-    country: "USA",
-    postalCode: "80401",
-  },
-  {
-    id: 5,
-    name: "Applewoods",
-    fullAddress: "Township Main Road Shantipura, Ahmedabad, Gujarat, India",
-    city: "Ahmedabad",
-    state: "Gujarat",
-    country: "India",
-    postalCode: "380057",
-  },
-];
 
 export function AddressStep({ userDetails, onBack, onNext }) {
   const { state, actions } = useTransakState();
@@ -180,20 +130,11 @@ export function AddressStep({ userDetails, onBack, onNext }) {
     }
   }, [state.userDetails, userDetails]);
 
-  // Filter suggestions based on search
+  // Filter suggestions based on search - disabled for production
   useEffect(() => {
-    if (addressSearch.length > 2) {
-      const filtered = mockAddressSuggestions.filter(
-        (address) =>
-          address.name.toLowerCase().includes(addressSearch.toLowerCase()) ||
-          address.fullAddress
-            .toLowerCase()
-            .includes(addressSearch.toLowerCase())
-      );
-      setAddressSuggestions(filtered);
-    } else {
-      setAddressSuggestions([]);
-    }
+    // In a real application, this would integrate with a geocoding API
+    // For now, address suggestions are disabled
+    setAddressSuggestions([]);
   }, [addressSearch]);
 
   const handleAddressSelect = (address) => {
@@ -333,8 +274,8 @@ export function AddressStep({ userDetails, onBack, onNext }) {
           actions.setKYCAddressSubmitted(true);
         } catch (apiError) {
           console.error("Error updating KYC user:", apiError);
-          // Continue with the flow even if API call fails, for demo purposes
-          console.log("Continuing with demo flow despite API error");
+          // Re-throw the error to handle it properly
+          throw apiError;
         }
       }
 
@@ -371,7 +312,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h2 className="text-xl font-medium text-gray-900">Address</h2>
           <div className="w-9 h-9" /> {/* Spacer for centering */}
@@ -382,7 +323,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
           className="px-6 py-6 space-y-6 overflow-y-auto flex-1 max-h-[calc(80vh-8rem)] scroll-smooth"
         >
           {/* Progress indicator */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <div className="h-2 bg-gray-200 rounded-full">
                 <div
@@ -391,22 +332,24 @@ export function AddressStep({ userDetails, onBack, onNext }) {
                 ></div>
               </div>
             </div>
-            <div className="ml-4">
-              <span className="text-sm text-gray-500">KYC STEP 2/4</span>
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center ml-auto mt-1">
-                <svg
-                  className="w-5 h-5 text-green-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+            <div className="w-4 h-4 bg-gray-500 rounded-full flex items-center justify-center ml-auto mt-1">
+              <svg
+                className="w-3 h-3 text-white"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
             </div>
+          </div>
+          <div className="flex justify-end -mt-4">
+            <span className="text-sm text-gray-600 font-medium">
+              KYC STEP 1/4
+            </span>
           </div>
 
           {/* Loading state for user data */}

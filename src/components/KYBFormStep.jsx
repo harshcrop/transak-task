@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, Upload, Check, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload, Check, AlertCircle } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
 import { TransakFooter } from "./TransakFooter.jsx";
 
@@ -1494,7 +1494,7 @@ export function KYBFormStep({ onBack, onNext }) {
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h2 className="text-xl font-medium text-gray-900">
             Know Your Business (KYB) Application

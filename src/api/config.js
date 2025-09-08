@@ -26,6 +26,7 @@ export const ENDPOINTS = {
   USER_DETAILS: `${API_BASE_URL}/api/v2/user/`,
   KYC_USER: `${API_BASE_URL}/api/v2/kyc/user`,
   KYC_REQUIREMENT: `${API_BASE_URL}/api/v2/kyc/requirement`,
+  KYC_ADDITIONAL_REQUIREMENTS: `${API_BASE_URL}/api/v2/kyc/additional-requirements`,
   KYC_PURPOSE_OF_USAGE: `${API_BASE_URL}/api/v2/kyc/purpose-of-usage`,
 };
 

@@ -85,7 +85,7 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex p-[1.2rem] items-center gap-2 bg-transparent hover:bg-gray-50 transition-colors text-lg font-medium min-w-[120px] h-full"
+        className="flex p-[1.25rem] items-center gap-2 bg-gray-100 hover:bg-gray-50 transition-colors text-lg font-medium min-w-[120px] h-full"
       >
         {selectedCurrencyData && (
           <div className="w-5 h-5 flex items-center justify-center">

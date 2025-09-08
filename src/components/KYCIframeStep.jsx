@@ -1,60 +1,60 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
 import { TransakFooter } from "./TransakFooter.jsx";
 import { KYBFormStep } from "./KYBFormStep.jsx";
 
 export function KYCIframeStep({ onBack, onNext }) {
   // TEST FLAG: Set to true to load KYB form instead of KYC iframe for testing
-  const TEST_LOAD_KYB_INSTEAD_OF_KYC = true;
+  const TEST_LOAD_KYB_INSTEAD_OF_KYC = false;
 
   const { state } = useTransakState();
-  const { kycProcess } = state;
   const [isLoading, setIsLoading] = useState(true);
-  const [kycUrl, setKycUrl] = useState(null);
+  const [iframeError, setIframeError] = useState(false);
+
+  // Get KYC URL directly from context
+  const kycUrl = state.kycProcess.kycUrl;
+  const additionalRequirementsFetched =
+    state.kycProcess.additionalRequirementsFetched;
+  const additionalRequirements = state.kycProcess.additionalRequirements;
 
   useEffect(() => {
-    console.log("KYC Requirements received:", kycProcess.requirements);
+    console.log("🎯 KYC Iframe Step - Context State:", {
+      kycUrl,
+      additionalRequirementsFetched,
+      hasAdditionalRequirements: !!additionalRequirements,
+      additionalRequirements: additionalRequirements,
+    });
 
-    // Extract KYC URL from requirements
-    if (kycProcess.requirements && kycProcess.requirements.formsRequired) {
-      const idProofForm = kycProcess.requirements.formsRequired.find(
-        (form) => form.type === "IDPROOF"
-      );
-
-      if (idProofForm && idProofForm.metadata) {
-        const urlFromMeta =
-          idProofForm.metadata.kycUrl || idProofForm.metadata.kycurl;
-        if (urlFromMeta) {
-          setKycUrl(urlFromMeta);
-          console.log("KYC URL found:", urlFromMeta);
-        } else {
-          console.error(
-            "No KYC URL found in IDPROOF metadata:",
-            idProofForm.metadata
-          );
-        }
-      } else {
-        console.error(
-          "No IDPROOF form found in requirements:",
-          kycProcess.requirements.formsRequired
-        );
-      }
+    if (kycUrl) {
+      console.log("✅ KYC URL available in iframe component:", kycUrl);
+      // Test URL accessibility
+      console.log("🔗 KYC URL details:", {
+        url: kycUrl,
+        domain: new URL(kycUrl).hostname,
+        protocol: new URL(kycUrl).protocol,
+      });
     } else {
-      console.error(
-        "No KYC requirements found. Current requirements:",
-        kycProcess.requirements
-      );
-
-      // If no requirements are available yet, we should wait for them to be fetched
-      if (!kycProcess.requirementsFetched) {
-        console.log("KYC requirements not yet fetched, waiting...");
-      }
+      console.log("❌ No KYC URL available in iframe component");
+      console.log("🔍 Debug additional requirements:", additionalRequirements);
     }
-  }, [kycProcess.requirements, kycProcess.requirementsFetched]);
+  }, [kycUrl, additionalRequirementsFetched, additionalRequirements]);
 
   const handleIframeLoad = () => {
     setIsLoading(false);
+    setIframeError(false);
+  };
+
+  const handleIframeError = () => {
+    console.error("❌ Iframe failed to load KYC URL:", kycUrl);
+    setIsLoading(false);
+    setIframeError(true);
+  };
+
+  const openInNewWindow = () => {
+    if (kycUrl) {
+      window.open(kycUrl, "_blank", "noopener,noreferrer");
+    }
   };
 
   const handleComplete = () => {
@@ -93,7 +93,7 @@ export function KYCIframeStep({ onBack, onNext }) {
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h2 className="text-xl font-medium text-gray-900">
             Identity Verification
@@ -101,21 +101,20 @@ export function KYCIframeStep({ onBack, onNext }) {
           <div className="w-9 h-9" /> {/* Spacer for centering */}
         </div>
 
-        {/* Progress indicator */}
-        <div className="flex items-center justify-between p-6 pb-4">
-          <div className="flex-1">
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div
-                className="h-2 bg-blue-600 rounded-full"
-                style={{ width: "100%" }}
-              ></div>
+        {/* Progress indicator section */}
+        <div className="px-6 py-4 bg-white">
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <div className="flex-1">
+              <div className="h-2 bg-gray-200 rounded-full">
+                <div
+                  className="h-2 bg-blue-600 rounded-full transition-all duration-300"
+                  style={{ width: "100%" }}
+                ></div>
+              </div>
             </div>
-          </div>
-          <div className="ml-4">
-            <span className="text-sm text-gray-500">KYC STEP 4/4</span>
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center ml-auto mt-1">
+            <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
               <svg
-                className="w-5 h-5 text-green-600"
+                className="w-3 h-3 text-white"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -127,12 +126,17 @@ export function KYCIframeStep({ onBack, onNext }) {
               </svg>
             </div>
           </div>
+          <div className="flex justify-end">
+            <span className="text-sm text-gray-600 font-medium">
+              KYC STEP 4/4
+            </span>
+          </div>
         </div>
 
         {/* Main content */}
-        <div className="relative flex-1 h-[calc(80vh-12rem)]">
-          {/* Show loading if requirements are being fetched */}
-          {!kycProcess.requirementsFetched ? (
+        <div className="relative" style={{ height: "calc(100vh - 22rem)" }}>
+          {/* Show loading if additional requirements are not yet fetched */}
+          {!additionalRequirementsFetched ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -154,14 +158,46 @@ export function KYCIframeStep({ onBack, onNext }) {
                 </div>
               )}
 
+              {/* Iframe error fallback */}
+              {iframeError && (
+                <div className="absolute inset-0 bg-gray-50 flex items-center justify-center z-10">
+                  <div className="text-center p-8">
+                    <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <ExternalLink className="w-8 h-8 text-yellow-600" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Iframe Loading Issue
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      The verification page couldn't load in this window. You
+                      can open it in a new tab to continue.
+                    </p>
+                    <button
+                      onClick={openInNewWindow}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mr-2"
+                    >
+                      Open in New Tab
+                    </button>
+                    <button
+                      onClick={handleComplete}
+                      className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                      Continue Without Verification
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* KYC iframe */}
               <iframe
                 src={kycUrl}
                 className="w-full h-full border-0"
                 title="KYC Verification"
                 onLoad={handleIframeLoad}
-                allow="camera; microphone; geolocation"
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
+                onError={handleIframeError}
+                allow="camera; microphone; geolocation; autoplay; encrypted-media; fullscreen"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation allow-modals allow-orientation-lock allow-popups-to-escape-sandbox"
+                referrerPolicy="no-referrer-when-downgrade"
               />
             </>
           ) : (
@@ -182,11 +218,12 @@ export function KYCIframeStep({ onBack, onNext }) {
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  KYC Requirements Unavailable
+                  KYC URL Unavailable
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  We couldn't retrieve the KYC verification requirements. Please
-                  try going back and completing the previous step again.
+                  We couldn't retrieve the KYC verification URL from the
+                  additional requirements. Please try going back and completing
+                  the previous step again.
                 </p>
                 <button
                   onClick={onBack}
@@ -206,31 +243,11 @@ export function KYCIframeStep({ onBack, onNext }) {
         </div>
 
         {/* Footer - only show if KYC URL is available */}
-        {kycUrl && (
-          <div className="p-6 border-t border-gray-100 bg-white">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
-                <p>Complete the verification process in the frame above</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => window.open(kycUrl, "_blank")}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Open in New Tab
-                </button>
-                <button
-                  onClick={handleComplete}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  I've Completed Verification
-                </button>
-              </div>
-            </div>
 
-            {/* Powered by Transak */}
-            <TransakFooter className="text-center mt-4" />
+        {/* Footer for other states */}
+        {!kycUrl && (
+          <div className="p-6 border-t border-gray-100 bg-white">
+            <TransakFooter className="text-center" />
           </div>
         )}
       </div>

@@ -103,6 +103,9 @@ const initialState = {
     purposeSubmitted: false,
     requirements: null,
     requirementsFetched: false,
+    additionalRequirements: null,
+    additionalRequirementsFetched: false,
+    kycUrl: null,
   },
 };
 
@@ -150,6 +153,7 @@ const actionTypes = {
   SET_KYC_ADDRESS_SUBMITTED: "SET_KYC_ADDRESS_SUBMITTED",
   SET_KYC_PURPOSE_SUBMITTED: "SET_KYC_PURPOSE_SUBMITTED",
   SET_KYC_REQUIREMENTS: "SET_KYC_REQUIREMENTS",
+  SET_KYC_ADDITIONAL_REQUIREMENTS: "SET_KYC_ADDITIONAL_REQUIREMENTS",
 
   // Reset/Load state
   RESET_STATE: "RESET_STATE",
@@ -334,6 +338,54 @@ function transakReducer(state, action) {
         },
       };
 
+    case actionTypes.SET_KYC_ADDITIONAL_REQUIREMENTS: {
+      // Extract kycUrl from the nested structure
+      let extractedKycUrl = null;
+
+      console.log("🔍 Extracting KYC URL from payload:", action.payload);
+
+      if (action.payload?.formsRequired?.length > 0) {
+        // Look for IDPROOF form type first
+        const idProofForm = action.payload.formsRequired.find(
+          (form) => form.type === "IDPROOF"
+        );
+
+        if (idProofForm?.metadata?.kycUrl) {
+          extractedKycUrl = idProofForm.metadata.kycUrl;
+          console.log("✅ Found KYC URL in IDPROOF form:", extractedKycUrl);
+        } else {
+          // Fallback: look for any form with kycUrl
+          for (const form of action.payload.formsRequired) {
+            if (form.metadata?.kycUrl) {
+              extractedKycUrl = form.metadata.kycUrl;
+              console.log(
+                "✅ Found KYC URL in form type",
+                form.type,
+                ":",
+                extractedKycUrl
+              );
+              break;
+            }
+          }
+        }
+      }
+
+      if (!extractedKycUrl) {
+        console.log("❌ No KYC URL found in additional requirements response");
+        console.log("📋 Available forms:", action.payload?.formsRequired);
+      }
+
+      return {
+        ...state,
+        kycProcess: {
+          ...state.kycProcess,
+          additionalRequirements: action.payload,
+          additionalRequirementsFetched: true,
+          kycUrl: extractedKycUrl,
+        },
+      };
+    }
+
     case actionTypes.LOAD_STATE:
       return {
         ...state,
@@ -469,6 +521,11 @@ export function TransakProvider({ children }) {
       dispatch({
         type: actionTypes.SET_KYC_REQUIREMENTS,
         payload: requirements,
+      }),
+    setKYCAdditionalRequirements: (additionalRequirements) =>
+      dispatch({
+        type: actionTypes.SET_KYC_ADDITIONAL_REQUIREMENTS,
+        payload: additionalRequirements,
       }),
 
     // Utility actions

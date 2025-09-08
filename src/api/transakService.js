@@ -602,6 +602,58 @@ export const submitPurposeOfUsage = async (accessToken, purposeList) => {
   }
 };
 
+/**
+ * Get KYC additional requirements with KYC URL
+ * @param {string} accessToken - Access token from login
+ * @param {string} quoteId - Quote ID from the quote API
+ * @returns {Promise<Object>} KYC additional requirements response with KYC URL
+ */
+export const getKYCAdditionalRequirements = async (accessToken, quoteId) => {
+  try {
+    console.log("🚀 getKYCAdditionalRequirements called with:", {
+      hasAccessToken: !!accessToken,
+      quoteId: quoteId,
+      endpoint: ENDPOINTS.KYC_ADDITIONAL_REQUIREMENTS,
+    });
+
+    const params = {
+      "metadata[quoteId]": quoteId,
+      apiKey: API_CONFIG.PARTNER_API_KEY,
+    };
+
+    const headers = {
+      authorization: accessToken,
+    };
+
+    console.log("📤 API Request params:", params);
+    console.log("📤 API Request headers:", {
+      ...headers,
+      authorization: "***",
+    });
+
+    const response = await get(
+      ENDPOINTS.KYC_ADDITIONAL_REQUIREMENTS,
+      params,
+      headers
+    );
+
+    console.log("📥 KYC Additional Requirements API Response:", response);
+
+    return {
+      success: true,
+      data: response.data || response,
+    };
+  } catch (error) {
+    console.error("❌ Error fetching KYC additional requirements:", error);
+    console.error("❌ Error response:", error.response || error);
+    throw new Error(
+      error.data?.message ||
+        error.message ||
+        "Failed to fetch KYC additional requirements"
+    );
+  }
+};
+
 export default {
   sendEmailOTP,
   verifyEmailOTP,
@@ -609,6 +661,7 @@ export default {
   refreshAccessToken,
   updateKYCUser,
   getKYCRequirements,
+  getKYCAdditionalRequirements,
   submitPurposeOfUsage,
   getFiatCurrencies,
   getCryptoCurrencies,

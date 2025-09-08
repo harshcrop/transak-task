@@ -333,7 +333,7 @@ export function TransakWidget() {
                 <div className="space-y-3">
                   {/* You pay section */}
                   <div
-                    className={`flex items-center rounded-lg overflow-hidden ${
+                    className={`flex items-center rounded-lg bg-white p-2 overflow-hidden ${
                       hasMinAmountError ? "border-red-500" : ""
                     }`}
                   >
@@ -398,7 +398,7 @@ export function TransakWidget() {
 
                 {/* You receive section */}
                 <div className="space-y-3">
-                  <div className="flex items-center rounded-lg overflow-hidden">
+                  <div className="flex items-center rounded-lg overflow-hidden bg-white p-2">
                     {/* Input side */}
                     <div className="flex-1 p-2 border-2 border-gray-300">
                       <span className="text-gray-500 text-sm block">

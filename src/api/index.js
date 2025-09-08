@@ -12,6 +12,7 @@ export {
   refreshAccessToken,
   updateKYCUser,
   getKYCRequirements,
+  getKYCAdditionalRequirements,
   submitPurposeOfUsage,
   getFiatCurrencies,
   getCryptoCurrencies,

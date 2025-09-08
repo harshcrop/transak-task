@@ -395,22 +395,6 @@ export function OTPVerificationStep({ email, stateToken, onBack, onNext }) {
                 "Continue"
               )}
             </button>
-
-            {/* Resend OTP */}
-            <div className="text-center">
-              {canResend ? (
-                <button
-                  onClick={handleResendOtp}
-                  className="text-blue-600 hover:underline text-sm"
-                >
-                  Resend verification code
-                </button>
-              ) : (
-                <p className="text-sm text-gray-500">
-                  Resend code in {resendTimer}s
-                </p>
-              )}
-            </div>
           </div>
 
           {/* Powered by Transak Footer */}

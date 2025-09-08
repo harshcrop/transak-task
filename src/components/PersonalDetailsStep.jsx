@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useTransakState } from "../context/TransakContext.jsx";
 import { getUserDetails, updateKYCUser } from "../api/index.js";
 import { TransakFooter } from "./TransakFooter.jsx";
@@ -354,7 +354,7 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h2 className="text-xl font-medium text-gray-900">
             Personal Details
@@ -364,7 +364,7 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
 
         <div className="px-6 py-6 space-y-6 overflow-y-auto">
           {/* Progress indicator */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <div className="h-2 bg-gray-200 rounded-full">
                 <div
@@ -373,22 +373,24 @@ export function PersonalDetailsStep({ userDetails, onBack, onNext }) {
                 ></div>
               </div>
             </div>
-            <div className="ml-4">
-              <span className="text-sm text-gray-500">KYC STEP 1/4</span>
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center ml-auto mt-1">
-                <svg
-                  className="w-5 h-5 text-green-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+            <div className="w-4 h-4 bg-gray-500 rounded-full flex items-center justify-center ml-auto mt-1">
+              <svg
+                className="w-3 h-3 text-white"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
             </div>
+          </div>
+          <div className="flex justify-end -mt-4">
+            <span className="text-sm text-gray-600 font-medium">
+              KYC STEP 1/4
+            </span>
           </div>
 
           {/* Loading state for user data */}
