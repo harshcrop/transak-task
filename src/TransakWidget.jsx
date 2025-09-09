@@ -225,10 +225,8 @@ export function TransakWidget() {
   // Handle KYB form step
   const handleKYBNext = (kybData) => {
     console.log("KYB form completed:", kybData);
-    // Here you can proceed to payment processing or show success
-    alert(
-      "KYB form submitted successfully! Your application is under review. Ready to proceed with payment."
-    );
+    // Redirect to main page (quote step) after successful submission
+    actions.setCurrentStep("quote");
   };
 
   const handleKYBBack = () => {

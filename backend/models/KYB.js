@@ -51,6 +51,10 @@ const kybSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    partnerUserId: {
+      type: String,
+      required: true,
+    },
     userEmail: {
       type: String,
       required: true,

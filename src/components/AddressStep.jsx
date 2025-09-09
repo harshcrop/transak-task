@@ -320,7 +320,7 @@ export function AddressStep({ userDetails, onBack, onNext }) {
 
         <div
           ref={scrollContainerRef}
-          className="px-6 py-6 space-y-6 overflow-y-auto flex-1 max-h-[calc(80vh-8rem)] scroll-smooth"
+          className="px-6 py-6 space-y-6 overflow-y-auto flex-1 max-h-[calc(80vh-12rem)] scroll-smooth"
         >
           {/* Progress indicator */}
           <div className="flex items-center justify-between gap-4">

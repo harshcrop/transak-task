@@ -469,6 +469,35 @@ export const refreshAccessToken = async (accessToken) => {
 };
 
 /**
+ * Get KYC user status/details
+ * @param {string} accessToken - Access token from login
+ * @returns {Promise<Object>} KYC user response
+ */
+export const getKYCUser = async (accessToken) => {
+  try {
+    const response = await get(
+      ENDPOINTS.KYC_USER,
+      {
+        apiKey: API_CONFIG.PARTNER_API_KEY,
+      },
+      {
+        authorization: accessToken,
+      }
+    );
+
+    return {
+      success: true,
+      data: response.data || response,
+    };
+  } catch (error) {
+    console.error("Error fetching KYC user:", error);
+    throw new Error(
+      error.data?.message || error.message || "Failed to fetch KYC user"
+    );
+  }
+};
+
+/**
  * Update KYC user data with personal and address details
  * @param {string} accessToken - Access token from login
  * @param {Object} personalDetails - User personal details (optional)
@@ -645,6 +674,7 @@ export default {
   verifyEmailOTP,
   getUserDetails,
   refreshAccessToken,
+  getKYCUser,
   updateKYCUser,
   getKYCRequirements,
   getKYCAdditionalRequirements,

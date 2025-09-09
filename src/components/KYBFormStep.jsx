@@ -13,6 +13,7 @@ export function KYBFormStep({ onBack, onNext }) {
   // Initialize form data with user information from KYC
   const [formData, setFormData] = useState({
     userId: state.userDetails?.id || Date.now().toString(),
+    partnerUserId: state.userDetails?.partnerUserId || "",
     userEmail: state.email?.email || "",
 
     // Acknowledgments
@@ -134,6 +135,7 @@ export function KYBFormStep({ onBack, onNext }) {
   const handleFileUpload = async (file) => {
     const formDataUpload = new FormData();
     formDataUpload.append("incorporationDocument", file);
+    formDataUpload.append("userEmail", formData.userEmail || "");
 
     try {
       const response = await fetch(
@@ -227,11 +229,16 @@ export function KYBFormStep({ onBack, onNext }) {
     setSubmitStatus(null);
 
     try {
-      // First, save or update the KYB data
-      const response = await fetch(
-        `http://localhost:5001/api/kyb/update/${formData.userId}`,
+      // Ensure partnerUserId is present before submit
+      if (!formData.partnerUserId) {
+        setSubmitStatus("error");
+        throw new Error("partnerUserId is required");
+      }
+      // Insert full KYB document on submit
+      const createResponse = await fetch(
+        "http://localhost:5001/api/kyb/create",
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -239,22 +246,8 @@ export function KYBFormStep({ onBack, onNext }) {
         }
       );
 
-      if (!response.ok) {
-        // If update fails, try creating new
-        const createResponse = await fetch(
-          "http://localhost:5001/api/kyb/create",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
-
-        if (!createResponse.ok) {
-          throw new Error("Failed to save KYB form");
-        }
+      if (!createResponse.ok) {
+        throw new Error("Failed to save KYB form");
       }
 
       // Then submit for review
@@ -275,7 +268,8 @@ export function KYBFormStep({ onBack, onNext }) {
       if (submitResponse.ok) {
         setSubmitStatus("success");
         setTimeout(() => {
-          onNext({ kybCompleted: true, kybSubmissionId: formData.userId });
+          // Redirect to main page after successful submission
+          window.location.href = "/";
         }, 2000);
       } else {
         throw new Error("Failed to submit KYB form");
@@ -1523,7 +1517,7 @@ export function KYBFormStep({ onBack, onNext }) {
         </div>
 
         {/* Content */}
-        <div className="p-6 max-h-[calc(80vh-12rem)] overflow-y-auto">
+        <div className="p-6 max-h-[calc(80vh-16rem)] overflow-y-auto">
           {renderSection()}
         </div>
 

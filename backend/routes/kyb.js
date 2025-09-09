@@ -8,7 +8,8 @@ const router = express.Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    // Save uploads under backend/uploads to match static serving path
+    cb(null, path.join(__dirname, "../uploads"));
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -66,9 +67,20 @@ router.get("/user/:userId", async (req, res) => {
 // POST /api/kyb/create - Create new KYB form
 router.post("/create", async (req, res) => {
   try {
-    const kybData = new KYB(req.body);
-    const savedKYB = await kybData.save();
-    res.status(201).json(savedKYB);
+    // Insert or fully replace the KYB document for this userId and partnerUserId
+    const { userId, partnerUserId } = req.body;
+    if (!userId || !partnerUserId) {
+      return res
+        .status(400)
+        .json({ error: "userId and partnerUserId are required" });
+    }
+    const saved = await KYB.findOneAndUpdate({ userId }, req.body, {
+      new: true,
+      upsert: true,
+      runValidators: false,
+      setDefaultsOnInsert: true,
+    });
+    res.status(201).json(saved);
   } catch (error) {
     console.error("Error creating KYB:", error);
     if (error.name === "ValidationError") {
@@ -86,19 +98,20 @@ router.put("/update/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     const updateData = req.body;
-
+    if (!updateData.partnerUserId) {
+      return res.status(400).json({ error: "partnerUserId is required" });
+    }
     const updatedKYB = await KYB.findOneAndUpdate(
       { userId },
       { $set: updateData },
-      { new: true, runValidators: true }
+      // Allow saving draft/partial data and create if not exists
+      { new: true, runValidators: false, upsert: true }
     );
-
     if (!updatedKYB) {
       return res
         .status(404)
         .json({ message: "KYB form not found for this user" });
     }
-
     res.json(updatedKYB);
   } catch (error) {
     console.error("Error updating KYB:", error);
@@ -119,28 +132,13 @@ router.post(
   async (req, res) => {
     try {
       const { userId } = req.params;
+      const { userEmail } = req.body;
 
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      // Update the KYB record with the file path
-      const updatedKYB = await KYB.findOneAndUpdate(
-        { userId },
-        {
-          $set: {
-            "companyInfo.businessDetails.incorporationDocument": req.file.path,
-          },
-        },
-        { new: true }
-      );
-
-      if (!updatedKYB) {
-        return res
-          .status(404)
-          .json({ message: "KYB form not found for this user" });
-      }
-
+      // Do not write to DB here. Only return file metadata.
       res.json({
         message: "File uploaded successfully",
         filePath: req.file.path,

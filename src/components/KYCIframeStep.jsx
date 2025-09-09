@@ -6,7 +6,7 @@ import { KYBFormStep } from "./KYBFormStep.jsx";
 
 export function KYCIframeStep({ onBack, onNext }) {
   // TEST FLAG: Set to true to load KYB form instead of KYC iframe for testing
-  const TEST_LOAD_KYB_INSTEAD_OF_KYC = false;
+  const TEST_LOAD_KYB_INSTEAD_OF_KYC = true;
 
   const { state } = useTransakState();
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +34,6 @@ export function KYCIframeStep({ onBack, onNext }) {
         domain: new URL(kycUrl).hostname,
         protocol: new URL(kycUrl).protocol,
       });
-    } else {
     }
   }, [kycUrl, additionalRequirementsFetched, additionalRequirements]);
 
