@@ -101,9 +101,17 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
 
           <ChevronDown className="w-4 h-4 flex-shrink-0" />
         </button>
-        <div className="text-center text-[8px] border border-gray-300 rounded mx-auto mb-[6px] inline-block px-3 py-1">
-          <p>{selectedCurrencyData?.networkDisplayName} network</p>
-        </div>
+
+        {/* Fixed network display with dynamic width */}
+        {selectedCurrencyData?.networkDisplayName && (
+          <div className="flex justify-center mb-[6px]">
+            <div className="text-center text-[8px] border border-gray-300 rounded px-2 py-1 inline-block min-w-[60px] max-w-[200px]">
+              <p className="whitespace-nowrap overflow-hidden text-ellipsis">
+                {selectedCurrencyData.networkDisplayName} network
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {isOpen && (
@@ -127,7 +135,7 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
               </div>
 
               {/* Search and Network Filter */}
-              <div className="p-4 space-y-3 ">
+              <div className="p-4 space-y-3">
                 <div className="flex gap-3">
                   {/* Search Input */}
                   <div className="relative flex-1">
@@ -137,21 +145,44 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
                       placeholder="Type a currency"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 text-sm bg-gray-100  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  text-gray-900 placeholder-gray-500"
+                      className="w-full pl-10 pr-4 py-3 text-sm bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
                     />
                   </div>
 
                   {/* Network Filter */}
                   <div className="relative">
-                    <select className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500  appearance-none pr-8">
-                      <option>All Networks</option>
+                    <select
+                      className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none pr-8"
+                      value={selectedCurrencyData?.networkDisplayName || ""}
+                      onChange={(e) => {
+                        const selectedNetwork = e.target.value;
+                        // Find the first currency with this networkDisplayName
+                        const currency = cryptoCurrencies.find(
+                          (c) => c.networkDisplayName === selectedNetwork
+                        );
+                        if (currency) {
+                          handleCurrencySelect(currency);
+                        }
+                      }}
+                    >
+                      <option value="">Select network</option>
+                      {[
+                        ...new Set(
+                          cryptoCurrencies.map((c) => c.networkDisplayName)
+                        ),
+                      ]
+                        .filter(Boolean)
+                        .map((network) => (
+                          <option key={network} value={network}>
+                            {network}
+                          </option>
+                        ))}
                     </select>
                     <ChevronDown className="w-4 h-4 absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                   </div>
                 </div>
               </div>
 
-              {/* Popular Currencies Label */}
               <div className="px-4 py-3">
                 <h3 className="text-xl font-medium text-gray-600">
                   Popular Currencies
@@ -192,7 +223,7 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
                       <button
                         key={currency.uniqueId || currency.symbol}
                         onClick={() => handleCurrencySelect(currency)}
-                        className={`w-full flex items-center gap-3 p-1 text-left hover:bg-gray-50  cursor-pointer ${
+                        className={`w-full flex items-center gap-3 p-1 text-left hover:bg-gray-50 cursor-pointer ${
                           currency.uniqueId === selectedCurrency ||
                           currency.symbol === selectedCurrency
                             ? ""

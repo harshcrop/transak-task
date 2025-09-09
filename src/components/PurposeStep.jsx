@@ -12,17 +12,14 @@ const purposeOptions = [
   {
     id: "investments",
     title: "Buying/selling crypto for investments",
-    description: "For long-term holding or portfolio diversification",
   },
   {
     id: "nfts",
     title: "Buying NFTs",
-    description: "For collecting or trading non-fungible tokens",
   },
   {
     id: "web3",
     title: "Buying crypto to use a web3 protocol",
-    description: "For DeFi, gaming, or other decentralized applications",
   },
 ];
 
@@ -159,7 +156,7 @@ export function PurposeStep({
     <div className="w-full max-w-md mx-auto">
       <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between p-6 pb-4  border-gray-100">
           <button
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -216,10 +213,8 @@ export function PurposeStep({
               <button
                 key={option.id}
                 onClick={() => setSelectedPurpose(option.id)}
-                className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                  selectedPurpose === option.id
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300 bg-white"
+                className={`w-full p-4 rounded-xl bg-gray-100 text-left cursor-pointer transition-all ${
+                  selectedPurpose === option.id ? "" : "  hover:bg-gray-200"
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -250,11 +245,6 @@ export function PurposeStep({
                         <h4 className="font-medium text-gray-900">
                           {option.title}
                         </h4>
-                        {option.description && (
-                          <p className="text-sm text-gray-600 mt-1">
-                            {option.description}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>
