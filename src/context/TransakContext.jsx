@@ -371,7 +371,6 @@ function transakReducer(state, action) {
       }
 
       if (!extractedKycUrl) {
-        console.log("❌ No KYC URL found in additional requirements response");
         console.log("📋 Available forms:", action.payload?.formsRequired);
       }
 

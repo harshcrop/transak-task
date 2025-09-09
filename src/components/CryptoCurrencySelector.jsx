@@ -83,22 +83,28 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex p-[1.25rem] items-center gap-2 bg-gray-100 hover:bg-gray-50 transition-colors text-lg font-medium min-w-[120px] h-full cursor-pointer"
-      >
-        {selectedCurrencyData && (
-          <div className="w-5 h-5 flex items-center justify-center">
-            <img
-              src={selectedCurrencyData.image.thumb}
-              alt={selectedCurrencyData.name}
-              className="w-5 h-5"
-            />
-          </div>
-        )}
-        <span>{extractSymbol(selectedCurrency)}</span>
-        <ChevronDown className="w-4 h-4 flex-shrink-0" />
-      </button>
+      <div className="grid m-auto bg-gray-100">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex p-[0.35rem] items-center justify-center gap-2 bg-gray-100 hover:bg-gray-50 transition-colors text-lg font-medium min-w-[120px] h-full cursor-pointer"
+        >
+          {selectedCurrencyData && (
+            <div className="w-5 h-5 flex items-center justify-center">
+              <img
+                src={selectedCurrencyData.image.thumb}
+                alt={selectedCurrencyData.name}
+                className="w-5 h-5"
+              />
+            </div>
+          )}
+          <span>{extractSymbol(selectedCurrency)}</span>
+
+          <ChevronDown className="w-4 h-4 flex-shrink-0" />
+        </button>
+        <div className="text-center text-[8px] border border-gray-300 rounded mx-auto mb-[6px] inline-block px-3 py-1">
+          <p>{selectedCurrencyData?.networkDisplayName} network</p>
+        </div>
+      </div>
 
       {isOpen && (
         <>
@@ -121,7 +127,7 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
               </div>
 
               {/* Search and Network Filter */}
-              <div className="p-4 space-y-3 border-b border-gray-200">
+              <div className="p-4 space-y-3 ">
                 <div className="flex gap-3">
                   {/* Search Input */}
                   <div className="relative flex-1">
@@ -131,13 +137,13 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
                       placeholder="Type a currency"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 text-sm bg-white border-2 border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full pl-10 pr-4 py-3 text-sm bg-gray-100  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  text-gray-900 placeholder-gray-500"
                     />
                   </div>
 
                   {/* Network Filter */}
                   <div className="relative">
-                    <select className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none pr-8">
+                    <select className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500  appearance-none pr-8">
                       <option>All Networks</option>
                     </select>
                     <ChevronDown className="w-4 h-4 absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -147,7 +153,7 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
 
               {/* Popular Currencies Label */}
               <div className="px-4 py-3">
-                <h3 className="text-sm font-medium text-gray-600">
+                <h3 className="text-xl font-medium text-gray-600">
                   Popular Currencies
                 </h3>
               </div>
@@ -180,13 +186,13 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
 
               {/* Currency list */}
               {!loading && (
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto px-6">
                   {filteredCurrencies.length > 0 ? (
                     filteredCurrencies.map((currency) => (
                       <button
                         key={currency.uniqueId || currency.symbol}
                         onClick={() => handleCurrencySelect(currency)}
-                        className={`w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer ${
+                        className={`w-full flex items-center gap-3 p-1 text-left hover:bg-gray-50  cursor-pointer ${
                           currency.uniqueId === selectedCurrency ||
                           currency.symbol === selectedCurrency
                             ? ""
@@ -194,12 +200,12 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
                         }`}
                       >
                         {/* Currency icon */}
-                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
-                          {currency.image?.thumb ? (
+                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center">
+                          {currency.image?.large ? (
                             <img
-                              src={currency.image.thumb}
+                              src={currency.image.large}
                               alt={currency.name}
-                              className="w-8 h-8"
+                              className="w-6 h-6"
                             />
                           ) : (
                             <span className="text-gray-700 text-xs font-bold">
@@ -210,16 +216,21 @@ export function CryptoCurrencySelector({ selectedCurrency, onCurrencyChange }) {
 
                         {/* Currency info */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-gray-900 text-lg">
-                              {currency.symbol}
-                            </span>
-                            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
-                              {currency.networkDisplayName || currency.network}
-                            </span>
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            {currency.name}
+                          <div className="flex items-center gap-2 mb-1 justify-between">
+                            <div className="flex gap-4 items-center">
+                              <span className="font-medium text-gray-900 text-xs">
+                                {currency.symbol}
+                              </span>
+                              <div className="text-sm text-gray-600">
+                                {currency.name}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                                {currency.networkDisplayName ||
+                                  currency.network}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </button>

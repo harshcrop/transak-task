@@ -109,7 +109,7 @@ export function FiatCurrencySelector({ selectedCurrency, onCurrencyChange }) {
           {/* Modal Overlay */}
           <div className="fixed inset-0 bg-white bg-opacity-50 z-50 flex items-center justify-center p-4">
             {/* Modal Content */}
-            <div className="bg-white text-gray-900 rounded-2xl w-full max-w-md h-[90vh] max-h-[600px] flex flex-col overflow-hidden shadow-2xl border border-gray-200">
+            <div className="bg-white text-gray-900 rounded-2xl w-[30rem] h-[80vh] flex flex-col overflow-hidden shadow-2xl border border-gray-200">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <button
@@ -125,7 +125,7 @@ export function FiatCurrencySelector({ selectedCurrency, onCurrencyChange }) {
               </div>
 
               {/* Search */}
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4">
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
@@ -133,14 +133,14 @@ export function FiatCurrencySelector({ selectedCurrency, onCurrencyChange }) {
                     placeholder="Type a currency"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 text-sm bg-white border-2 border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                    className="w-full pl-10 pr-4 py-3 text-sm bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
                   />
                 </div>
               </div>
 
               {/* Currencies Label */}
               <div className="px-4 py-3">
-                <h3 className="text-sm font-medium text-gray-600">
+                <h3 className="text-xl font-medium text-gray-600">
                   Currencies
                 </h3>
               </div>
@@ -179,7 +179,7 @@ export function FiatCurrencySelector({ selectedCurrency, onCurrencyChange }) {
                       <button
                         key={currency.symbol}
                         onClick={() => handleCurrencySelect(currency)}
-                        className={`w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 ${
+                        className={`w-full cursor-pointer flex items-center gap-3 pl-4 p-3 text-left hover:bg-gray-50  ${
                           currency.symbol ===
                           (selectedCurrency?.symbol || selectedCurrency)
                             ? "bg-blue-50"
@@ -188,23 +188,23 @@ export function FiatCurrencySelector({ selectedCurrency, onCurrencyChange }) {
                       >
                         {/* Currency icon */}
                         <div className="flex-shrink-0">
-                          {renderCurrencyIcon(currency, "w-8 h-8")}
+                          {renderCurrencyIcon(currency, "w-6 h-6")}
                         </div>
 
                         {/* Currency info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-gray-900 text-lg">
+                            <span className="font-medium text-gray-900 text-sm">
                               {currency.symbol}
                             </span>
-                            {currency.isAllowed === false && (
+                            {/* {currency.isAllowed === false && (
                               <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
                                 Limited
                               </span>
-                            )}
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            {currency.name}
+                            )} */}
+                            <div className="text-sm text-gray-600">
+                              {currency.name}
+                            </div>
                           </div>
                         </div>
                       </button>

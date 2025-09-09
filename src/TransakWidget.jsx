@@ -316,7 +316,7 @@ export function TransakWidget() {
   return (
     <>
       {state.currentStep === "quote" && (
-        <div className="w-full max-w-md mx-auto">
+        <div className="w-full max-w-md mx-auto ">
           <div className="w-[30rem] h-[80vh] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
             {/* Header with Buy title and menu */}
             <div className="flex items-center justify-between p-6 pb-4">
@@ -338,7 +338,7 @@ export function TransakWidget() {
                     }`}
                   >
                     {/* Input side */}
-                    <div className="flex-1 p-2 border-2 border-gray-300">
+                    <div className="flex-1 p-[9px] border-2 rounded-l-lg border-gray-300">
                       <span className="text-gray-500 text-sm block">
                         You pay
                       </span>
@@ -356,7 +356,7 @@ export function TransakWidget() {
                     </div>
 
                     {/* Dropdown side */}
-                    <div className="border-2 border-gray-300">
+                    <div className="border-2 rounded-r-lg border-gray-300 p-[1px]">
                       <FiatCurrencySelector
                         selectedCurrency={selectedFiatCurrency}
                         onCurrencyChange={handleFiatCurrencyChange}
@@ -400,7 +400,7 @@ export function TransakWidget() {
                 <div className="space-y-3">
                   <div className="flex items-center rounded-lg overflow-hidden bg-white p-2">
                     {/* Input side */}
-                    <div className="flex-1 p-2 border-2 border-gray-300">
+                    <div className="flex-1 p-[9px] rounded-l-lg border-2 border-gray-300">
                       <span className="text-gray-500 text-sm block">
                         You receive (estimate)
                       </span>
@@ -423,7 +423,7 @@ export function TransakWidget() {
                     </div>
 
                     {/* Dropdown side */}
-                    <div className="border-2 border-gray-300">
+                    <div className="border-2 rounded-r-lg border-gray-300 p-[1px]">
                       <CryptoCurrencySelector
                         selectedCurrency={selectedCryptoCurrency}
                         onCurrencyChange={setSelectedCryptoCurrency}

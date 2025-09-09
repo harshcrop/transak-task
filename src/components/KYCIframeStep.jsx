@@ -35,8 +35,6 @@ export function KYCIframeStep({ onBack, onNext }) {
         protocol: new URL(kycUrl).protocol,
       });
     } else {
-      console.log("❌ No KYC URL available in iframe component");
-      console.log("🔍 Debug additional requirements:", additionalRequirements);
     }
   }, [kycUrl, additionalRequirementsFetched, additionalRequirements]);
 

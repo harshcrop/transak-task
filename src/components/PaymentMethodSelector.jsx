@@ -28,7 +28,7 @@ export function PaymentMethodSelector({
   };
 
   return (
-    <div className="transak-calculator-breakdown transak-calculator-breakdown--inverse">
+    <div className="transak-calculator-breakdown transak-calculator-breakdown--inverse ml-12">
       {/* Payment Methods Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">

@@ -610,12 +610,6 @@ export const submitPurposeOfUsage = async (accessToken, purposeList) => {
  */
 export const getKYCAdditionalRequirements = async (accessToken, quoteId) => {
   try {
-    console.log("🚀 getKYCAdditionalRequirements called with:", {
-      hasAccessToken: !!accessToken,
-      quoteId: quoteId,
-      endpoint: ENDPOINTS.KYC_ADDITIONAL_REQUIREMENTS,
-    });
-
     const params = {
       "metadata[quoteId]": quoteId,
       apiKey: API_CONFIG.PARTNER_API_KEY,
@@ -625,19 +619,11 @@ export const getKYCAdditionalRequirements = async (accessToken, quoteId) => {
       authorization: accessToken,
     };
 
-    console.log("📤 API Request params:", params);
-    console.log("📤 API Request headers:", {
-      ...headers,
-      authorization: "***",
-    });
-
     const response = await get(
       ENDPOINTS.KYC_ADDITIONAL_REQUIREMENTS,
       params,
       headers
     );
-
-    console.log("📥 KYC Additional Requirements API Response:", response);
 
     return {
       success: true,
