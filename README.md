@@ -52,25 +52,69 @@ VITE_TRANSAK_API_KEY=your-actual-api-key
 VITE_ENVIRONMENT=STAGING  # or PRODUCTION
 ```
 
-## Getting Started
+## Getting Started (Full Stack)
 
-1. Install dependencies:
+### 1. Install dependencies (frontend & backend):
 
 ```bash
+# In the project root
 npm install
+
+# In the backend folder
+cd backend && npm install
 ```
 
-2. Set up environment variables (see Environment Setup above)
+### 2. Set up environment variables
 
-3. Start the development server:
+- Frontend: see Environment Setup above
+- Backend: create a `.env` file in `backend/` with:
+
+```env
+MONGODB_URI=mongodb://localhost:27017/transak_kyb
+PORT=5001
+```
+
+### 3. Start the servers (concurrently):
 
 ```bash
-npm run dev
+# From the project root
+npm run dev-all
 ```
 
-4. Open [http://localhost:5173](http://localhost:5173) to view the application
+This will start both the Vite frontend and the Express backend with hot reload.
 
-## API Usage Examples
+Frontend: [http://localhost:5173](http://localhost:5173)
+Backend API: [http://localhost:5001](http://localhost:5001)
+
+## Backend API (KYB)
+
+The backend provides endpoints for Know Your Business (KYB) form management and file uploads.
+
+### Main Endpoints
+
+- `POST   /api/kyb/create` — Create or upsert a KYB form
+- `PUT    /api/kyb/update/:userId` — Update a KYB form
+- `GET    /api/kyb/user/:userId` — Get KYB form for a user
+- `POST   /api/kyb/upload/:userId` — Upload incorporation document (file upload)
+- `POST   /api/kyb/submit/:userId` — Submit KYB form for review
+- `GET    /api/kyb/all` — List all KYB forms (admin)
+- `GET    /api/kyb/stats` — Get KYB statistics
+
+Uploads are saved to `backend/uploads/` and served at `/uploads/`.
+
+#### Example: Uploading a Document
+
+```bash
+curl -F "incorporationDocument=@/path/to/file.pdf" http://localhost:5001/api/kyb/upload/USER_ID
+```
+
+#### Example: Creating a KYB Form
+
+```bash
+curl -X POST http://localhost:5001/api/kyb/create \
+  -H "Content-Type: application/json" \
+  -d '{ "userId": "123", "partnerUserId": "abc", ... }'
+```
 
 ### Using Hooks in Components
 
@@ -109,28 +153,48 @@ const order = await transakService.createOrder({
 
 ## Build for Production
 
+Frontend:
+
 ```bash
 npm run build
 ```
 
+Backend:
+
+```bash
+cd backend && npm start
+```
+
 ## Technical Stack
 
-- **React 19** - UI Framework
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Styling
-- **Lucide React** - Icons
-- **Custom API Layer** - Transak integration
+- **React 19** — UI Framework
+- **Vite** — Build tool and dev server
+- **Tailwind CSS** — Styling
+- **Lucide React** — Icons
+- **Express** — Backend server (KYB API)
+- **MongoDB & Mongoose** — Database for KYB forms
+- **Multer** — File uploads
 
 ## Project Structure
 
 ```
-src/
-├── api/                # API integration layer
-├── assets/            # Static assets
-├── App.jsx           # Main application component
-├── TransakWidget.jsx # Main widget component
-├── main.jsx          # Application entry point
-└── index.css         # Global styles
+transak-task/
+├── backend/
+│   ├── server.js         # Express server
+│   ├── models/KYB.js     # Mongoose KYB schema
+│   ├── routes/kyb.js     # KYB API routes
+│   ├── uploads/          # Uploaded documents
+│   └── package.json      # Backend dependencies
+├── public/
+├── src/
+│   ├── api/              # Frontend API integration
+│   ├── components/       # React components
+│   ├── context/          # React context
+│   ├── App.jsx           # Main app
+│   ├── main.jsx          # Entry point
+│   └── index.css         # Styles
+├── package.json          # Frontend dependencies/scripts
+└── README.md
 ```
 
 ## Contributing
@@ -139,15 +203,8 @@ src/
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Requestte
+5. Open a Pull Request
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This project provides a full-stack template for integrating Transak's widget and a robust KYB backend with file uploads and MongoDB. For advanced linting, see the [Vite React TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts).
